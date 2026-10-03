@@ -1,4 +1,4 @@
-/* Garagem Verona - comportamento do site de demonstracao */
+/* Preguinho Veiculos - comportamento do site (paginas separadas por rota de hash) */
 (function () {
   'use strict';
 
@@ -13,16 +13,15 @@
   if (HAS_GSAP) gsap.registerPlugin(ScrollTrigger, Flip);
 
   var nf = new Intl.NumberFormat('pt-BR');
+  var nf2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   var DEFAULT_ACCENT = '#fba500';
   function brl(n) { return 'R$ ' + nf.format(Math.round(n)); }
-  var nf2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   function km(n) { return nf.format(n) + ' km'; }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function fmtH(h) { return h.replace(':', 'h'); }
   function nome(c) { return c.marca + ' ' + c.modelo; }
-  function setHash(h) { try { history.replaceState(null, '', h); } catch (e) { /* frame restrito */ } }
-  function save(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignorado */ } }
+  function save(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* modo privado */ } }
   function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 
   function toast(msg) {
@@ -39,8 +38,8 @@
     return .2126 * a[0] + .7152 * a[1] + .0722 * a[2];
   }
   function inkFor(hex) {
-    var L = lum(hex), d = lum('#15110e'), w = lum('#fbfbfa');
-    return (L + .05) / (d + .05) >= (w + .05) / (L + .05) ? '#15110e' : '#fbfbfa';
+    var L = lum(hex), d = lum('#17120a'), w = lum('#fbfbfa');
+    return (L + .05) / (d + .05) >= (w + .05) / (L + .05) ? '#17120a' : '#fbfbfa';
   }
 
   /* ---------- estado ---------- */
@@ -51,6 +50,7 @@
   var F = { q: '', carroceria: '', marca: '', comb: '', cambio: '', preco: Infinity, ordem: 'destaque', fav: false };
   var visible = [];
   var sim = { id: null, ent: 30, prazo: 48 };
+  var current = { name: '', id: '' };
 
   function avail() { return cars.filter(function (c) { return !c.vendido; }); }
   function byId(id) { return cars.filter(function (c) { return c.id === id; })[0]; }
@@ -58,12 +58,10 @@
     var i = (loja.jurosMensal || 1.89) / 100, P = price * (1 - ent);
     return P * i / (1 - Math.pow(1 + i, -n));
   }
+  function pageEl(n) { return $('.page[data-page="' + n + '"]'); }
+  function onPage(n) { var p = pageEl(n); return p && !p.hidden; }
 
   /* ---------- identidade da loja ---------- */
-  function iniciais(n) {
-    var p = n.trim().split(/\s+/).filter(function (w) { return w.length > 1 || /^[A-Z]/.test(w); });
-    return ((p[0] || '?')[0] + (p[1] ? p[1][0] : (p[0] || '  ')[1] || '')).toUpperCase();
-  }
   function waNum() {
     var d = String(loja.whatsapp || '').replace(/\D/g, '');
     return d && d.indexOf('55') !== 0 && d.length <= 11 ? '55' + d : d;
@@ -79,16 +77,14 @@
     var accent = loja.cor || DEFAULT_ACCENT;
     root.style.setProperty('--accent', accent);
     root.style.setProperty('--accent-ink', inkFor(accent));
-    $$('[data-bind]').forEach(function (el) {
-      var k = el.dataset.bind;
-      el.textContent = k === 'iniciais' ? iniciais(loja.nome) : (loja[k] != null ? loja[k] : '');
-    });
+    $$('[data-bind]').forEach(function (el) { var k = el.dataset.bind; el.textContent = loja[k] != null ? loja[k] : ''; });
     $$('[data-bind-href]').forEach(function (el) { el.href = 'tel:+55' + String(loja.telefone).replace(/\D/g, ''); });
     $$('[data-bind-mail]').forEach(function (el) { el.href = 'mailto:' + loja.email; });
+    $$('[data-juros]').forEach(function (el) { el.textContent = String(loja.jurosMensal).replace('.', ','); });
     $$('.wm').forEach(function (el) { el.textContent = loja.nome; });
-    document.title = loja.nome + ' - ' + loja.slogan;
+    refreshTitle();
     $$('[data-wa]').forEach(function (el) { setWa(el); });
-    var m = loja.mapa, bb = [m.lon - .008, m.lat - .0045, m.lon + .008, m.lat + .0045].join(',');
+    var m = loja.mapa, bb = [m.lon - .006, m.lat - .0034, m.lon + .006, m.lat + .0034].join(',');
     var frame = $('#mapFrame');
     var src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + bb + '&layer=mapnik&marker=' + m.lat + ',' + m.lon;
     if (frame && frame.getAttribute('src') !== src) frame.setAttribute('src', src);
@@ -97,13 +93,17 @@
       return '<div class="hours-line"><span>' + h.rotulo + '</span><span>' + h.texto + '</span></div>';
     }).join('');
     renderOpen();
-    renderStoryCar();
-    renderAboutCar();
     var sf = $('#sFine');
     if (sf) sf.textContent = 'Simulação ilustrativa com taxa de ' + String(loja.jurosMensal).replace('.', ',') + '% ao mês. Valores sujeitos à análise de crédito.';
     var sw = $('#swatches');
     if (sw) $$('.swatch', sw).forEach(function (b) { b.setAttribute('aria-checked', String(b.dataset.c.toLowerCase() === accent.toLowerCase())); });
-    if (cars.length) { updateSim(); renderModalWa(); }
+    if (cars.length) { updateSim(true); if (current.name === 'veiculo') renderVehicleWa(); }
+  }
+
+  var TITLES = { estoque: 'Estoque', financiamento: 'Financiamento', venda: 'Venda seu carro', sobre: 'Sobre nós', contato: 'Venha fazer seu test drive' };
+  function refreshTitle() {
+    var t = current.name === 'veiculo' && byId(current.id) ? nome(byId(current.id)) : TITLES[current.name];
+    document.title = t ? t + ' | ' + loja.nome : loja.nome + ' - ' + loja.slogan;
   }
 
   /* ---------- aberto agora ---------- */
@@ -132,7 +132,7 @@
     root.dataset.theme = t;
     save('gv-tema', t);
     var mt = $('meta[name="theme-color"]');
-    if (mt) mt.content = t === 'dark' ? '#0d0e10' : '#eef0f2';
+    if (mt) mt.content = t === 'dark' ? '#18191b' : '#5f6062';
   }
   $('#themeBtn').addEventListener('click', function () { setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark'); });
 
@@ -143,9 +143,10 @@
     if (i > -1) favs.splice(i, 1); else favs.push(id);
     save('gv-favs', JSON.stringify(favs));
     syncFavs();
-    if (F.fav) applyFilters(true);
+    if (F.fav) applyFilters(onPage('estoque'));
   }
   function setHeart(btn, on) {
+    if (!btn) return;
     btn.setAttribute('aria-pressed', String(on));
     var u = $('use', btn);
     if (u) u.setAttribute('href', on ? '#i-heart-fill' : '#i-heart');
@@ -155,19 +156,27 @@
     var b = $('#favCount');
     b.hidden = n === 0; b.textContent = n;
     $$('.card').forEach(function (el) { setHeart($('.card-fav', el), isFav(el.dataset.id)); });
-    if (modalId) setHeart($('#mFav'), isFav(modalId));
+    if (current.name === 'veiculo') setHeart($('#vFav'), isFav(current.id));
     setHeart($('#favBtn'), F.fav);
-    $('#favBtn').setAttribute('aria-pressed', String(F.fav));
   }
   $('#favBtn').addEventListener('click', function () {
     if (!F.fav && !favs.length) { toast('Toque no coração de um carro para salvá-lo aqui.'); return; }
     F.fav = !F.fav;
-    applyFilters(true);
+    applyFilters(false);
     syncFavs();
-    $('#estoque').scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth' });
+    go('estoque');
   });
 
   /* ---------- cards ---------- */
+  var cardIO = null;
+  function observeCard(el) {
+    if (!MOTION || !('IntersectionObserver' in window)) return;
+    root.classList.add('cards-io');
+    if (!cardIO) cardIO = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); cardIO.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -6% 0px' });
+    cardIO.observe(el);
+  }
   function cardHTML(c) {
     var selo = c.selo ? '<span class="selo"><svg class="ic"><use href="' + (c.selo === 'Blindado' ? '#i-shield' : '#i-seal') + '"/></svg>' + esc(c.selo) + '</span>' : '';
     return '<div class="card-img"><div class="art" role="presentation"></div><span class="wm"></span>' + selo +
@@ -175,41 +184,37 @@
       '<div class="card-body">' +
         '<div class="c-brand">' + esc(c.marca) + '</div><div class="c-model">' + esc(c.modelo) + '</div><div class="c-ver">' + esc(c.versao) + '</div>' +
         '<div class="c-meta"><span>' + km(c.km) + '</span><span>' + c.ano + '/' + c.anoModelo + '</span></div>' +
-        '<div class="c-price"><small>R$</small><span class="p-val">' + nf2.format(c.preco) + '</span></div><div class="c-sub p-sub"></div>' +
+        '<div class="c-price"><small>R$</small><span class="p-val"></span></div><div class="c-sub p-sub"></div>' +
       '</div>' +
       '<button class="card-hit" type="button" aria-label="Ver detalhes do ' + esc(nome(c) + ' ' + c.versao) + '"></button>';
   }
-  function updateCardPrice(c) {
-    var el = cardMap[c.id]; if (!el) return;
+  function updateCardEl(el, c) {
     $('.p-val', el).textContent = nf2.format(c.preco);
     $('.p-sub', el).textContent = 'ou ' + brl(pmt(c.preco, .3, 48)) + '/mês em 48x';
   }
-
-  function buildCards() {
-    var grid = $('#grid');
-    grid.innerHTML = '';
-    cardMap = {};
-    cars.forEach(function (c) {
-      var el = document.createElement('article');
-      el.className = 'card'; el.dataset.id = c.id;
-      el.innerHTML = cardHTML(c);
-      $('.wm', el).textContent = loja.nome;
-      CarArt.mount($('.art', el), c);
-      cardMap[c.id] = el;
-      updateCardPrice(c);
-      grid.appendChild(el);
-    });
-    grid.setAttribute('aria-busy', 'false');
-    if (MOTION && 'IntersectionObserver' in window) {
-      root.classList.add('cards-io');
-      var io = new IntersectionObserver(function (es) {
-        es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-      }, { rootMargin: '0px 0px -8% 0px' });
-      $$('.card', grid).forEach(function (el) { io.observe(el); });
-      /* cards que ficam visiveis depois de um filtro tambem precisam ser observados */
-      grid._io = io;
-    }
+  function updateCardPrices(c) { $$('.card[data-id="' + c.id + '"]').forEach(function (el) { updateCardEl(el, c); }); }
+  function makeCard(c) {
+    var el = document.createElement('article');
+    el.className = 'card'; el.dataset.id = c.id;
+    el.innerHTML = cardHTML(c);
+    $('.wm', el).textContent = loja.nome;
+    Photos.mount($('.art', el), c, { w: 700 });
+    updateCardEl(el, c);
+    setHeart($('.card-fav', el), isFav(c.id));
+    observeCard(el);
+    return el;
   }
+
+  function go(path) {
+    var h = '#/' + path;
+    if (location.hash === h) route(); else location.hash = h;
+  }
+  document.addEventListener('click', function (e) {
+    var card = e.target.closest && e.target.closest('.card');
+    if (!card) return;
+    if (e.target.closest('.card-fav')) { toggleFav(card.dataset.id); return; }
+    if (e.target.closest('.card-hit')) go('veiculo/' + card.dataset.id);
+  });
 
   /* spotlight do mouse nos cards */
   document.addEventListener('pointermove', function (e) {
@@ -220,24 +225,25 @@
     card.style.setProperty('--my', (e.clientY - r.top) + 'px');
   }, { passive: true });
 
-  $('#grid').addEventListener('click', function (e) {
-    var card = e.target.closest('.card'); if (!card) return;
-    if (e.target.closest('.card-fav')) { toggleFav(card.dataset.id); return; }
-    if (e.target.closest('.card-hit')) openModal(card.dataset.id);
-  });
+  /* ---------- pagina de estoque ---------- */
+  function buildCards() {
+    var grid = $('#grid');
+    grid.innerHTML = '';
+    cardMap = {};
+    cars.forEach(function (c) { var el = makeCard(c); cardMap[c.id] = el; grid.appendChild(el); });
+    grid.setAttribute('aria-busy', 'false');
+  }
 
-  /* ---------- filtros ---------- */
   function rangeFill(inp) {
     var p = (inp.value - inp.min) / (inp.max - inp.min) * 100;
     inp.style.setProperty('--fill', p + '%');
   }
 
   function populateFilters() {
-    var all = cars;
-    function uniq(k) { var o = {}; all.forEach(function (c) { o[c[k]] = 1; }); return Object.keys(o).sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); }); }
+    function uniq(k) { var o = {}; cars.forEach(function (c) { o[c[k]] = 1; }); return Object.keys(o).sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); }); }
+    var ph = { fMarca: 'Marca', fCarroceria: 'Carroceria' };
     function fill(sel, vals) {
       var cur = sel.value;
-      var ph = { fMarca: 'Marca', fCarroceria: 'Carroceria' };
       sel.innerHTML = '<option value="">' + (ph[sel.id] || 'Todos') + '</option>' + vals.map(function (v) { return '<option>' + esc(v) + '</option>'; }).join('');
       sel.value = vals.indexOf(cur) > -1 ? cur : '';
     }
@@ -246,7 +252,7 @@
     fill($('#fComb'), uniq('combustivel'));
     fill($('#fCambio'), uniq('cambio'));
 
-    var prices = all.map(function (c) { return c.preco; });
+    var prices = cars.map(function (c) { return c.preco; });
     var max = Math.ceil(Math.max.apply(null, prices) / 5000) * 5000, min = Math.floor(Math.min.apply(null, prices) / 5000) * 5000;
     var fp = $('#fPreco');
     fp.min = min; fp.max = max;
@@ -255,9 +261,8 @@
 
     var bm = {};
     avail().forEach(function (c) { bm[c.marca] = (bm[c.marca] || 0) + 1; });
-    var row = $('#brandsRow');
-    row.innerHTML = Object.keys(window.BRAND_PATHS).filter(function (b) { return bm[b]; }).map(function (b) {
-      return '<button class="brand-btn" type="button" data-b="' + b + '" aria-pressed="' + (F.marca === b) + '" aria-label="Filtrar ' + b + ' (' + bm[b] + ' no estoque)" title="' + b + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + window.BRAND_PATHS[b] + '"/></svg></button>';
+    $('#brandsRow').innerHTML = Object.keys(window.BRAND_PATHS).filter(function (b) { return bm[b]; }).map(function (b) {
+      return '<button class="brand-btn" type="button" data-b="' + b + '" aria-pressed="' + (F.marca === b) + '" aria-label="Ver ' + b + ' no estoque (' + bm[b] + ')" title="' + b + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + window.BRAND_PATHS[b] + '"/></svg></button>';
     }).join('');
   }
   function updatePrecoOut() {
@@ -275,7 +280,7 @@
       if (F.comb && c.combustivel !== F.comb) return false;
       if (F.cambio && c.cambio !== F.cambio) return false;
       if (c.preco > F.preco) return false;
-      if (q && (c.marca + ' ' + c.modelo + ' ' + c.versao + ' ' + c.cor.nome + ' ' + c.ano).toLowerCase().indexOf(q) < 0) return false;
+      if (q && (c.marca + ' ' + c.modelo + ' ' + c.versao + ' ' + c.ano).toLowerCase().indexOf(q) < 0) return false;
       return true;
     });
     var sorters = {
@@ -289,10 +294,10 @@
     visible = list;
 
     var grid = $('#grid'), els = $$('.card', grid);
-    var state = animate && MOTION ? Flip.getState(els) : null;
+    var state = animate && MOTION && els.length ? Flip.getState(els) : null;
     var ids = {};
     list.forEach(function (c) { ids[c.id] = 1; });
-    cars.forEach(function (c) { var el = cardMap[c.id]; el.hidden = !ids[c.id]; if (ids[c.id] && grid._io && !el.classList.contains('in')) grid._io.observe(el); });
+    cars.forEach(function (c) { var el = cardMap[c.id]; if (el) el.hidden = !ids[c.id]; });
     list.forEach(function (c) { grid.appendChild(cardMap[c.id]); });
 
     if (state) {
@@ -301,7 +306,7 @@
         duration: .75, ease: 'power3.inOut', absolute: true, stagger: .015,
         onEnter: function (e) { return gsap.fromTo(e, { opacity: 0, scale: .92 }, { opacity: 1, scale: 1, duration: .6, delay: .2, ease: 'power3.out', clearProps: 'opacity,scale' }); },
         onLeave: function (e) { return gsap.to(e, { opacity: 0, scale: .92, duration: .3, ease: 'power2.in' }); },
-        onComplete: function () { els.forEach(function (el) { el.classList.remove('flipping'); }); ScrollTrigger.refresh(); }
+        onComplete: function () { els.forEach(function (el) { el.classList.remove('flipping'); }); }
       });
     }
 
@@ -311,9 +316,9 @@
     grid.hidden = list.length === 0;
     var total = avail().length;
     $('#resultCount').innerHTML = '<b>' + list.length + '</b> ' + (list.length === 1 ? 'carro encontrado' : 'carros encontrados') + (list.length !== total ? ' de ' + total : '');
-    $('#fCarroceria').value = F.carroceria;
     $$('.brand-btn').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.b === F.marca)); });
     $('#fMarca').value = F.marca;
+    $('#fCarroceria').value = F.carroceria;
   }
 
   function resetFilters() {
@@ -327,6 +332,7 @@
     var t;
     $('#fBusca').addEventListener('input', function (e) { clearTimeout(t); var v = e.target.value; t = setTimeout(function () { F.q = v; applyFilters(true); }, 180); });
     $('#fMarca').addEventListener('change', function (e) { F.marca = e.target.value; applyFilters(true); });
+    $('#fCarroceria').addEventListener('change', function (e) { F.carroceria = e.target.value; applyFilters(true); });
     $('#fComb').addEventListener('change', function (e) { F.comb = e.target.value; applyFilters(true); });
     $('#fCambio').addEventListener('change', function (e) { F.cambio = e.target.value; applyFilters(true); });
     $('#fOrdem').addEventListener('change', function (e) { F.ordem = e.target.value; applyFilters(true); });
@@ -335,7 +341,6 @@
       F.preco = +e.target.value >= +e.target.max ? Infinity : +e.target.value;
     });
     $('#fPreco').addEventListener('change', function () { applyFilters(true); });
-    $('#fCarroceria').addEventListener('change', function (e) { F.carroceria = e.target.value; applyFilters(true); });
     $('#advBtn').addEventListener('click', function () {
       var box = $('#advBox'), open = box.hidden;
       box.hidden = !open;
@@ -345,116 +350,46 @@
     $('#brandsRow').addEventListener('click', function (e) {
       var b = e.target.closest('.brand-btn'); if (!b) return;
       F.marca = F.marca === b.dataset.b ? '' : b.dataset.b;
-      applyFilters(true);
-      $('#estoque').scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth' });
+      applyFilters(false);
+      go('estoque');
     });
     $('#fClear').addEventListener('click', resetFilters);
     $('#emptyReset').addEventListener('click', resetFilters);
   }
 
-  /* ---------- skeleton ---------- */
   function showSkeleton() {
     var s = '';
-    for (var i = 0; i < 6; i++) s += '<div class="skel" aria-hidden="true"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line"></div></div>';
+    for (var i = 0; i < 8; i++) s += '<div class="skel" aria-hidden="true"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line"></div></div>';
     $('#grid').innerHTML = s;
     $('#grid').setAttribute('aria-busy', 'true');
   }
 
-  /* ---------- modal ---------- */
-  var modalId = null, lastFocus = null;
-  function renderModalWa() {
-    if (!modalId) return;
-    var c = byId(modalId);
-    setWa($('#mWa'), 'Olá! Tenho interesse no ' + nome(c) + ' ' + c.versao + ' ' + c.ano + ', anunciado por ' + brl(c.preco) + '. Ainda está disponível?');
-  }
-  function fillModal(c) {
-    modalId = c.id;
-    CarArt.mount($('#mMedia'), c, { eager: true });
-    $('#mBrand').textContent = c.marca;
-    $('#mTitle').textContent = c.modelo;
-    $('#mVersion').textContent = c.versao;
-    $('#mPrice').textContent = brl(c.preco);
-    $('#mParcela').innerHTML = 'ou <b>' + brl(pmt(c.preco, .3, 48)) + '</b>/mês em 48x com 30% de entrada';
-    $('#mDesc').textContent = c.descricao;
-    var specs = [['Ano', c.ano + '/' + c.anoModelo], ['Quilometragem', km(c.km)], ['Câmbio', c.cambio], ['Combustível', c.combustivel], ['Motor', c.motor], ['Potência', c.potencia], ['Cor', c.cor.nome], ['Portas', c.portas]];
-    $('#mSpecs').innerHTML = specs.map(function (s) { return '<div><dt>' + s[0] + '</dt><dd>' + esc(s[1]) + '</dd></div>'; }).join('');
-    $('#mOpts').innerHTML = c.opcionais.map(function (o) { return '<span>' + esc(o) + '</span>'; }).join('');
-    setHeart($('#mFav'), isFav(c.id));
-    renderModalWa();
-  }
-  function openModal(id) {
-    var c = byId(id); if (!c) return;
-    lastFocus = document.activeElement;
-    var m = $('#modal'), card = $('.modal-card', m);
-    fillModal(c);
-    m.hidden = false;
-    root.style.overflow = 'hidden';
-    card.scrollTop = 0; $('.modal-body', m).scrollTop = 0;
-    if (MOTION) {
-      gsap.fromTo($('.modal-scrim', m), { opacity: 0 }, { opacity: 1, duration: .35 });
-      gsap.fromTo(card, { opacity: 0, y: 40, scale: .96 }, { opacity: 1, y: 0, scale: 1, duration: .6, ease: 'power4.out' });
-      gsap.fromTo($$('.modal-body > *', m), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: .55, ease: 'power3.out', stagger: .04, delay: .12, clearProps: 'opacity,transform' });
-    }
-    $('.modal-close', m).focus({ preventScroll: true });
-    setHash('#' + id);
-  }
-  function closeModal() {
-    if (modalId == null) return;
-    var m = $('#modal');
-    function done() { m.hidden = true; root.style.overflow = ''; modalId = null; if (lastFocus) lastFocus.focus({ preventScroll: true }); setHash(location.pathname + location.search); }
-    if (MOTION) {
-      gsap.to($('.modal-card', m), { opacity: 0, y: 24, scale: .98, duration: .28, ease: 'power2.in' });
-      gsap.to($('.modal-scrim', m), { opacity: 0, duration: .3, onComplete: done });
-    } else done();
-  }
-  function stepModal(dir) {
-    if (!visible.length) return;
-    var i = visible.map(function (c) { return c.id; }).indexOf(modalId);
-    var n = visible[(i + dir + visible.length) % visible.length];
-    fillModal(n);
-    if (MOTION) gsap.fromTo($('.modal-media .art', $('#modal')), { opacity: 0, x: dir * 30 }, { opacity: 1, x: 0, duration: .5, ease: 'power3.out' });
-    setHash('#' + n.id);
-  }
-  $('#modal').addEventListener('click', function (e) { if (e.target.closest('[data-close]')) closeModal(); });
-  $('#mPrev').addEventListener('click', function () { stepModal(-1); });
-  $('#mNext').addEventListener('click', function () { stepModal(1); });
-  $('#mFav').addEventListener('click', function () { toggleFav(modalId); });
-  $('#mTest').addEventListener('click', function () {
-    var id = modalId; closeModal();
-    setTimeout(function () { $('#tdCar').value = id; $('#contato').scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth' }); }, MOTION ? 320 : 0);
-  });
-
-  /* ---------- teclado global ---------- */
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') {
-      if (modalId != null) closeModal();
-      else if (!$('#panel').hidden) closePanel();
-      else if ($('#nav').classList.contains('open')) toggleMenu(false);
-    }
-    if (modalId != null) {
-      if (e.key === 'ArrowLeft') stepModal(-1);
-      if (e.key === 'ArrowRight') stepModal(1);
-      if (e.key === 'Tab') {
-        var f = $$('button, a[href], input, select', $('.modal-card')).filter(function (x) { return !x.disabled && x.offsetParent !== null; });
-        if (!f.length) return;
-        var first = f[0], last = f[f.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-      }
-    }
-  });
-
-  /* ---------- hero ---------- */
-  var hero = { list: [], i: 0, tween: null, layer: null };
+  /* ---------- pagina inicial ---------- */
   function heroList() {
     var f = avail().filter(function (c) { return c.destaque; });
     if (f.length < 3) f = f.concat(avail().filter(function (c) { return !c.destaque; }).sort(function (a, b) { return b.preco - a.preco; }).slice(0, 3 - f.length));
     return f.slice(0, 5);
   }
-  function heroCar(c) {
+  function renderHome() {
+    var f = avail().filter(function (c) { return c.destaque; });
+    if (f.length < 4) f = f.concat(avail().filter(function (c) { return !c.destaque; }));
+    var g = $('#homeGrid');
+    g.innerHTML = '';
+    f.slice(0, 4).forEach(function (c) { g.appendChild(makeCard(c)); });
+    Photos.mount($('#promiseImg'), { fotos: window.MIDIA.promessa, marca: 'Carro', modelo: 'revisado' }, { w: 1200 });
+  }
+
+  /* ---------- hero ---------- */
+  var hero = { list: [], i: 0, tween: null, layer: null, intro: false };
+  function heroSlide(c) {
     var d = document.createElement('div');
     d.className = 'stage-car';
-    d.innerHTML = CarArt.svg(c);
+    Photos.loadFirst(c.fotos, 1800, nome(c), true, function (img) {
+      img.className = 'hero-photo';
+      d.appendChild(img);
+      if (MOTION) gsap.fromTo(img, { opacity: 0, scale: 1.07 }, { opacity: 1, scale: 1, duration: 1.8, ease: 'power2.out' });
+      else img.style.opacity = 1;
+    });
     return d;
   }
   function setHeroText(c) {
@@ -474,19 +409,22 @@
   }
   function showHero(k, instant) {
     if (!hero.list.length) return;
-    var c = hero.list[k], old = $('.stage-car', hero.layer), dir = k >= hero.i ? 1 : -1;
+    var c = hero.list[k], old = $('.stage-car', hero.layer);
     $$('.hero-dot').forEach(function (t, n) { t.setAttribute('aria-selected', String(n === k)); });
     hero.i = k;
     setHeroText(c);
-    var el = heroCar(c);
+    var el = heroSlide(c);
     hero.layer.appendChild(el);
     if (MOTION && !instant) {
-      el.classList.add('rolling');
-      gsap.fromTo(el, { xPercent: 14 * dir, opacity: 0 }, { xPercent: 0, opacity: 1, duration: .95, ease: 'power4.out' });
-      if (old) gsap.to(old, { xPercent: -14 * dir, opacity: 0, duration: .6, ease: 'power3.in', onComplete: function () { old.remove(); } });
+      if (old) gsap.to(old, { opacity: 0, duration: 1, ease: 'power2.inOut', onComplete: function () { old.remove(); } });
       gsap.fromTo(['#htA', '#htB', '#htC', '.ht-foot'], { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: .8, ease: 'power3.out', stagger: .07, overwrite: true });
     } else if (old) old.remove();
-    if (MOTION) hero.tween = gsap.delayedCall(5.8, function () { showHero((hero.i + 1) % hero.list.length); });
+    if (onPage('inicio')) startHeroTimer();
+  }
+  function startHeroTimer() {
+    if (!MOTION || !hero.list.length) return;
+    if (hero.tween) hero.tween.kill();
+    hero.tween = gsap.delayedCall(6.5, function () { showHero((hero.i + 1) % hero.list.length); });
   }
   function bindHero() {
     $('#heroTabs').addEventListener('click', function (e) {
@@ -494,60 +432,105 @@
       if (hero.tween) hero.tween.kill();
       showHero(+t.dataset.k);
     });
-    $('#hcOpen').addEventListener('click', function () { openModal(hero.list[hero.i].id); });
+    $('#hcOpen').addEventListener('click', function () { if (hero.list[hero.i]) go('veiculo/' + hero.list[hero.i].id); });
     var h = $('#hero');
     h.addEventListener('pointerenter', function () { if (hero.tween) hero.tween.pause(); });
     h.addEventListener('pointerleave', function () { if (hero.tween) hero.tween.resume(); });
     document.addEventListener('visibilitychange', function () { if (!hero.tween) return; document.hidden ? hero.tween.pause() : hero.tween.resume(); });
     if (MOTION && window.matchMedia('(pointer: fine)').matches) {
-      var lx, ly, sx, sy, slash = $('.hero-slash');
+      var lx, ly;
       h.addEventListener('pointermove', function (e) {
         if (!hero.layer) return;
-        if (!lx) { lx = gsap.quickTo(hero.layer, 'x', { duration: .9, ease: 'power3' }); ly = gsap.quickTo(hero.layer, 'y', { duration: .9, ease: 'power3' }); sx = gsap.quickTo(slash, 'x', { duration: 1.3, ease: 'power3' }); sy = gsap.quickTo(slash, 'y', { duration: 1.3, ease: 'power3' }); }
+        if (!lx) { lx = gsap.quickTo(hero.layer, 'x', { duration: 1, ease: 'power3' }); ly = gsap.quickTo(hero.layer, 'y', { duration: 1, ease: 'power3' }); }
         var r = h.getBoundingClientRect(), px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5;
-        lx(px * -26); ly(py * -12); sx(px * 34); sy(py * 18);
+        lx(px * -24); ly(py * -12);
       });
     }
   }
   function introHero() {
+    hero.intro = true;
     if (!MOTION) return;
-    gsap.fromTo('#heroStage', { opacity: 0, x: 90 }, { opacity: 1, x: 0, duration: 1.4, ease: 'power4.out' });
-    gsap.fromTo('.hero-slash i', { opacity: 0, y: 60 }, { opacity: function (i) { return i ? .6 : .8; }, y: 0, duration: 1.2, ease: 'power4.out', stagger: .15 });
-    gsap.to(['.ht-a', '.ht-b', '.ht-c', '.ht-foot'], { opacity: 1, y: 0, duration: 1, ease: 'power4.out', stagger: .12, delay: .15 });
+    gsap.to(['.ht-a', '.ht-b', '.ht-c', '.ht-foot'], { opacity: 1, y: 0, duration: 1, ease: 'power4.out', stagger: .12, delay: .1 });
   }
 
-  /* ---------- historia pinada ---------- */
-  function renderStoryCar() {
-    var accent = loja.cor || DEFAULT_ACCENT;
-    $('#storyCar').innerHTML = CarArt.svg({ marca: 'SUV', modelo: 'ilustração', carroceria: 'SUV', cor: { nome: 'cor da marca', hex: accent } });
+  /* ---------- pagina do veiculo ---------- */
+  var galleryToken = 0;
+  function vehicleList() {
+    var l = visible.length ? visible : avail();
+    return l.some(function (c) { return c.id === current.id; }) ? l : avail();
   }
-  function renderAboutCar() {
-    var box = $('#aboutArt'); if (!box) return;
-    var holder = $('.about-car', box);
-    if (!holder) { holder = document.createElement('div'); holder.className = 'about-car'; holder.style.cssText = 'position:relative;width:86%;margin-right:auto'; box.insertBefore(holder, box.firstChild); }
-    holder.innerHTML = CarArt.svg({ marca: 'Carro', modelo: 'ilustração', carroceria: 'SUV', cor: { nome: 'cor da marca', hex: loja.cor || DEFAULT_ACCENT } });
+  function renderVehicleWa() {
+    var c = byId(current.id); if (!c) return;
+    setWa($('#vWa'), 'Olá! Tenho interesse no ' + nome(c) + ' ' + c.versao + ' ' + c.ano + ', anunciado por ' + brl(c.preco) + '. Ainda está disponível?');
+    setWa($('#vTest'), 'Olá! Quero fazer um test drive do ' + nome(c) + ' ' + c.versao + ' (' + c.ano + '). Quais horários vocês têm?');
   }
-  var storyMM = null;
-  function initStory() {
-    if (!MOTION) return;
-    storyMM = gsap.matchMedia();
-    var items = $$('.story-item'), car = $('#storyCar');
-    storyMM.add('(min-width: 900px)', function () {
-      function wheels(p) { $$('.wheel-spin', car).forEach(function (w) { w.style.transform = 'rotate(' + (p * 2400) + 'deg)'; }); }
-      var tl = gsap.timeline({
-        scrollTrigger: { trigger: '#porque', start: 'top top', end: '+=1500', pin: true, scrub: .5, anticipatePin: 1 },
-        onUpdate: function () {
-          wheels(tl.progress());
-          var c = car.getBoundingClientRect(), cx = c.left + c.width * .5;
-          items.forEach(function (it) { var r = it.getBoundingClientRect(); it.classList.toggle('on', cx > r.left + r.width * .35); });
-        }
-      });
-      tl.fromTo(car, { x: function () { return -car.offsetWidth; } }, { x: function () { return window.innerWidth - car.offsetWidth * .1; }, ease: 'none' });
-      return function () { items.forEach(function (it) { it.classList.remove('on'); }); gsap.set(car, { clearProps: 'transform' }); };
+  function renderGallery(c) {
+    var main = $('#vgMain'), th = $('#vgThumbs'), token = ++galleryToken, selected = false, shown = 0;
+    main.className = 'v-main art';
+    main.innerHTML = Photos.placeholder();
+    th.innerHTML = '';
+    th.classList.add('single');
+    function select(b, u) {
+      $$('.v-thumb', th).forEach(function (x) { x.setAttribute('aria-selected', String(x === b)); });
+      var img = new Image();
+      img.className = 'art-photo'; img.alt = nome(c); img.decoding = 'async';
+      img.onload = function () {
+        if (token !== galleryToken) return;
+        $$('.art-photo', main).forEach(function (e) { e.remove(); });
+        main.appendChild(img); main.classList.add('has-photo');
+        if (MOTION) gsap.fromTo(img, { opacity: 0 }, { opacity: 1, duration: .5 });
+      };
+      img.src = Photos.src(u, 1400);
+    }
+    (c.fotos || []).forEach(function (u, i) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'v-thumb'; b.setAttribute('role', 'tab'); b.setAttribute('aria-label', 'Foto ' + (i + 1)); b.setAttribute('aria-selected', 'false'); b.hidden = true;
+      var im = new Image();
+      im.alt = '';
+      im.onload = function () {
+        if (token !== galleryToken) return;
+        b.hidden = false; shown++;
+        th.classList.toggle('single', shown < 2);
+        if (!selected) { selected = true; select(b, u); }
+      };
+      im.onerror = function () { b.remove(); };
+      im.src = Photos.src(u, 300);
+      b.appendChild(im);
+      b.addEventListener('click', function () { select(b, u); });
+      th.appendChild(b);
     });
-    storyMM.add('(max-width: 899px)', function () {
-      gsap.fromTo(car, { x: function () { return -car.offsetWidth; } }, { x: function () { return window.innerWidth; }, ease: 'none', scrollTrigger: { trigger: '.story-road', start: 'top 92%', end: 'bottom 8%', scrub: .5 } });
-    });
+  }
+  function renderVehicle(id) {
+    var c = byId(id); if (!c) return;
+    $('#vCrumb').textContent = nome(c);
+    $('#vBrand').textContent = c.marca;
+    $('#vTitle').textContent = c.modelo;
+    $('#vVersion').textContent = c.versao;
+    $('#vPrice').textContent = brl(c.preco);
+    $('#vParcela').innerHTML = 'ou <b>' + brl(pmt(c.preco, .3, 48)) + '</b>/mês em 48x com 30% de entrada';
+    $('#vDesc').textContent = c.descricao;
+    var specs = [['Ano', c.ano + '/' + c.anoModelo], ['Quilometragem', km(c.km)], ['Câmbio', c.cambio], ['Combustível', c.combustivel], ['Motor', c.motor], ['Potência', c.potencia], ['Carroceria', c.carroceria], ['Portas', c.portas]];
+    $('#vSpecs').innerHTML = specs.map(function (s) { return '<div><dt>' + s[0] + '</dt><dd>' + esc(s[1]) + '</dd></div>'; }).join('');
+    $('#vOpts').innerHTML = c.opcionais.map(function (o) { return '<li><svg class="ic"><use href="#i-check"/></svg>' + esc(o) + '</li>'; }).join('');
+    setHeart($('#vFav'), isFav(c.id));
+    renderVehicleWa();
+    renderGallery(c);
+    var others = avail().filter(function (x) { return x.id !== c.id; });
+    others.sort(function (a, b) { return (b.carroceria === c.carroceria) - (a.carroceria === c.carroceria) || Math.abs(a.preco - c.preco) - Math.abs(b.preco - c.preco); });
+    var rg = $('#relGrid');
+    rg.innerHTML = '';
+    others.slice(0, 4).forEach(function (x) { rg.appendChild(makeCard(x)); });
+  }
+  function bindVehicle() {
+    $('#vFav').addEventListener('click', function () { toggleFav(current.id); });
+    $('#vSim').addEventListener('click', function () { sim.id = current.id; });
+    function step(dir) {
+      var l = vehicleList(), i = l.map(function (c) { return c.id; }).indexOf(current.id);
+      if (!l.length) return;
+      go('veiculo/' + l[(i + dir + l.length) % l.length].id);
+    }
+    $('#vPrev').addEventListener('click', function () { step(-1); });
+    $('#vNext').addEventListener('click', function () { step(1); });
   }
 
   /* ---------- simulador ---------- */
@@ -565,6 +548,7 @@
   function updateSim(instant) {
     var c = byId(sim.id); if (!c) return;
     var ent = sim.ent / 100, entV = c.preco * ent, fin = c.preco - entV, p = pmt(c.preco, ent, sim.prazo);
+    $('#sCar').value = sim.id;
     $('#sEntOut').textContent = sim.ent + '% (' + brl(entV) + ')';
     rangeFill($('#sEnt'));
     $('#sPreco').textContent = brl(c.preco);
@@ -582,7 +566,7 @@
     $('#sPrazo').addEventListener('click', function (e) { var b = e.target.closest('.chip'); if (!b) return; sim.prazo = +b.dataset.n; updateSim(); });
   }
 
-  /* ---------- formularios ---------- */
+  /* ---------- formulario de venda ---------- */
   function fieldErr(input, msg) {
     var f = input.closest('.field'), e = $('.field-err', f);
     f.classList.toggle('invalid', !!msg);
@@ -625,55 +609,17 @@
       if (MOTION) gsap.from($('#sellOk'), { opacity: 0, y: 16, duration: .6, ease: 'power3.out' });
     });
     $('#sellAgain').addEventListener('click', function () { sf.reset(); sf.hidden = false; $('#sellOk').hidden = true; sf.elements.nome.focus(); });
-
-    var tf = $('#tdForm');
-    tf.elements.nome.addEventListener('input', function () { fieldErr(tf.elements.nome, ''); });
-    tf.addEventListener('submit', function (e) {
-      e.preventDefault();
-      if (!validate(tf, { nome: req('seu nome') })) return;
-      var c = byId(tf.elements.carro.value), dia = $('#tdDia').selectedOptions[0].textContent, hora = tf.elements.hora.value;
-      var msg = 'Olá! Gostaria de agendar um test-drive do ' + nome(c) + ' ' + c.versao + ' (' + c.ano + ') em ' + dia + ', às ' + fmtH(hora) + '. Meu nome é ' + tf.elements.nome.value.trim() + '.';
-      var url = 'https://wa.me/' + waNum() + '?text=' + encodeURIComponent(msg);
-      var ok = $('#tdOk');
-      ok.hidden = false;
-      ok.innerHTML = 'Pedido pronto para ' + esc(dia) + ' às ' + fmtH(hora) + '. <a class="link-btn" target="_blank" rel="noopener" href="' + url + '">Confirmar pelo WhatsApp</a>';
-      toast('Test-drive reservado. Falta confirmar no WhatsApp.');
-    });
-  }
-
-  /* dias e horarios do test-drive */
-  function buildTestDrive() {
-    var list = avail(), sel = $('#tdCar'), cur = sel.value;
-    sel.innerHTML = list.map(function (c) { return '<option value="' + c.id + '">' + esc(nome(c) + ' ' + c.ano) + '</option>'; }).join('');
-    if (cur && list.some(function (c) { return c.id === cur; })) sel.value = cur;
-    if ($('#tdDia').options.length) return;
-    var days = [], d = new Date(), names = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
-    function hoursFor(day) { return loja.horarios.filter(function (h) { return h.dias.indexOf(day) > -1; })[0]; }
-    for (var i = 0; days.length < 7 && i < 20; i++) {
-      var x = new Date(d.getFullYear(), d.getMonth(), d.getDate() + i), h = hoursFor(x.getDay());
-      if (!h || !h.abre) continue;
-      if (i === 0 && (d.getHours() * 60 + d.getMinutes()) > (+h.fecha.split(':')[0] - 1) * 60) continue;
-      days.push({ date: x, h: h, label: (i === 0 ? 'Hoje' : i === 1 ? 'Amanhã' : names[x.getDay()]) + ', ' + pad(x.getDate()) + '/' + pad(x.getMonth() + 1) });
-    }
-    $('#tdDia').innerHTML = days.map(function (o, k) { return '<option value="' + k + '">' + o.label + '</option>'; }).join('');
-    function hours() {
-      var o = days[+$('#tdDia').value], out = [], s = +o.h.abre.split(':')[0], e = +o.h.fecha.split(':')[0];
-      for (var h = s; h < e; h++) out.push(pad(h) + ':00');
-      $('#tdHora').innerHTML = out.map(function (v) { return '<option value="' + v + '">' + fmtH(v) + '</option>'; }).join('');
-    }
-    $('#tdDia').addEventListener('change', hours);
-    hours();
   }
 
   /* ---------- depoimentos ---------- */
   function bindCarousel() {
     var tr = $('#depTrack');
-    function step(dir) { var q = $('.quote', tr); tr.scrollBy({ left: dir * (q.offsetWidth + 16), behavior: REDUCE ? 'auto' : 'smooth' }); }
+    function step(dir) { var q = $('.quote', tr); tr.scrollBy({ left: dir * (q.offsetWidth + 18), behavior: REDUCE ? 'auto' : 'smooth' }); }
     $('#depPrev').addEventListener('click', function () { step(-1); });
     $('#depNext').addEventListener('click', function () { step(1); });
-    var down = false, sx = 0, sl = 0, moved = false;
-    tr.addEventListener('pointerdown', function (e) { if (e.pointerType !== 'mouse') return; down = true; moved = false; sx = e.clientX; sl = tr.scrollLeft; });
-    window.addEventListener('pointermove', function (e) { if (!down) return; var dx = e.clientX - sx; if (Math.abs(dx) > 4) { moved = true; tr.classList.add('drag'); } tr.scrollLeft = sl - dx; });
+    var down = false, sx = 0, sl = 0;
+    tr.addEventListener('pointerdown', function (e) { if (e.pointerType !== 'mouse') return; down = true; sx = e.clientX; sl = tr.scrollLeft; });
+    window.addEventListener('pointermove', function (e) { if (!down) return; var dx = e.clientX - sx; if (Math.abs(dx) > 4) tr.classList.add('drag'); tr.scrollLeft = sl - dx; });
     window.addEventListener('pointerup', function () { if (!down) return; down = false; tr.classList.remove('drag'); });
   }
 
@@ -709,6 +655,11 @@
       $$('.tab-pane').forEach(function (p) { p.hidden = p.dataset.pane !== b.dataset.tab; });
     });
   });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (!$('#panel').hidden) closePanel();
+    else if ($('#nav').classList.contains('open')) toggleMenu(false);
+  });
 
   function renderAdmin() {
     $('#admList').innerHTML = cars.map(function (c) {
@@ -735,26 +686,29 @@
     pt = setTimeout(function () {
       if (!(v > 0)) return;
       c.preco = v; API.atualizar(c.id, { preco: v });
-      updateCardPrice(c); onStockChanged(true);
+      updateCardPrices(c); onStockChanged(true);
     }, 300);
   });
   $('#admReset').addEventListener('click', function () {
     API.resetarEstoque();
-    API.listar().then(function (l) { cars = l; renderAdmin(); cars.forEach(updateCardPrice); onStockChanged(); toast('Estoque original restaurado'); });
+    API.listar().then(function (l) { cars = l; renderAdmin(); cars.forEach(updateCardPrices); onStockChanged(); toast('Estoque original restaurado'); });
   });
 
   function onStockChanged(priceOnly) {
-    var feat = hero.list[hero.i];
-    applyFilters(true);
+    applyFilters(onPage('estoque'));
     populateFilters();
     applyFilters(false);
-    buildSim(); buildTestDrive(); syncFavs();
+    buildSim(); syncFavs();
+    renderHome();
+    var feat = hero.list[hero.i];
     if (!priceOnly || !feat || byId(feat.id).vendido) { if (hero.tween) hero.tween.kill(); buildHero(); }
     else setHeroText(feat);
-    if (HAS_GSAP) ScrollTrigger.refresh();
+    if (current.name === 'veiculo') {
+      var c = byId(current.id);
+      if (!c || c.vendido) go('estoque'); else renderVehicle(current.id);
+    }
   }
 
-  /* marca */
   function bindBrandForm() {
     var form = $('#brandForm'), t;
     function fillForm() { form.elements.nome.value = loja.nome; form.elements.cidade.value = loja.cidade; form.elements.whatsapp.value = loja.whatsapp; }
@@ -778,8 +732,41 @@
         toast('Estoque sincronizado: ' + avail().length + ' veículos no ar');
       });
     });
-    fillForm.call(null);
   }
+
+  /* ---------- rotas (paginas) ---------- */
+  var PAGES = ['inicio', 'estoque', 'veiculo', 'financiamento', 'venda', 'sobre', 'contato'];
+  function parseRoute() {
+    var p = location.hash.replace(/^#\/?/, '').split('/');
+    return { name: PAGES.indexOf(p[0]) > -1 ? p[0] : 'inicio', id: p[1] || '' };
+  }
+  function route(opts) {
+    opts = opts || {};
+    var r = parseRoute();
+    if (r.name === 'veiculo' && cars.length && (!byId(r.id) || byId(r.id).vendido)) { location.replace('#/estoque'); return; }
+    var changed = r.name !== current.name || r.id !== current.id;
+    current = r;
+    $$('.page').forEach(function (pg) { pg.hidden = pg.dataset.page !== r.name; });
+    $('#nav').classList.toggle('solid', r.name !== 'inicio');
+    var key = r.name === 'veiculo' ? 'estoque' : r.name;
+    $$('.nav-side a').forEach(function (a) { a.classList.toggle('on', a.dataset.route === key); });
+    refreshTitle();
+    toggleMenu(false);
+
+    if (cars.length) {
+      if (r.name === 'veiculo') renderVehicle(r.id);
+      if (r.name === 'financiamento') { buildSim(); }
+      if (r.name === 'inicio' && !hero.intro) introHero();
+    }
+    if (r.name === 'inicio') { if (hero.tween && hero.tween.isActive && !document.hidden) hero.tween.resume(); else if (cars.length && !hero.tween) startHeroTimer(); }
+    else if (hero.tween) hero.tween.pause();
+
+    if (!opts.silent && changed) {
+      window.scrollTo(0, 0);
+      if (MOTION) gsap.fromTo(pageEl(r.name), { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: .55, ease: 'power3.out', clearProps: 'transform' });
+    }
+  }
+  window.addEventListener('hashchange', function () { route(); });
 
   /* ---------- animacoes de pagina ---------- */
   function initMotion() {
@@ -792,38 +779,26 @@
         nav.classList.toggle('hide', s.direction === 1 && s.scroll() > 520 && !nav.classList.contains('open'));
       }
     });
+  }
 
-    /* revelacao ao rolar */
-    var targets = ['#estoque .sec-title', '#estoque .sec-sub', '.filters', '.fin-copy > *', '.sim', '.about-copy > *', '.about-art', '.stats > div', '.sell-form-wrap', '.dep-head', '.quote', '.contact-info > *', '.map', '.brands .wrap > *', '.footer-in > *'];
-    targets.forEach(function (s) { $$(s).forEach(function (el) { el.classList.add('rv'); }); });
-    ScrollTrigger.batch('.rv', {
-      start: 'top 90%', once: true,
-      onEnter: function (b) { gsap.to(b, { opacity: 1, y: 0, duration: .9, ease: 'power3.out', stagger: .08 }); }
-    });
+  /* revelacao ao rolar e contadores, por IntersectionObserver (funciona em qualquer pagina) */
+  function initReveal() {
+    if (!MOTION || !('IntersectionObserver' in window)) return;
+    var targets = ['.sec-title', '.sec-sub', '.filters', '.fin-copy > *', '.sim', '.about-copy > *', '.about-img', '.stats > div', '.sell-form-wrap', '.dep-head', '.quote', '.contact-info > *', '.map', '.brands .wrap > *', '.promise-copy', '.promise-img', '.center-cta', '.banner-row', '.v-gallery', '.v-info', '.v-detail > div', '.footer-in > *'];
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    targets.forEach(function (s) { $$(s).forEach(function (el) { if (!el.classList.contains('rv')) { el.classList.add('rv'); io.observe(el); } }); });
 
-    /* contadores */
-    $$('.count').forEach(function (el) {
-      var to = +el.dataset.to, suf = el.dataset.suffix || '', o = { v: 0 };
-      ScrollTrigger.create({
-        trigger: el, start: 'top 90%', once: true,
-        onEnter: function () { gsap.to(o, { v: to, duration: 2, ease: 'power3.out', onUpdate: function () { el.textContent = nf.format(Math.round(o.v)) + suf; } }); }
+    var cio = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        cio.unobserve(e.target);
+        var el = e.target, to = +el.dataset.to, suf = el.dataset.suffix || '', o = { v: 0 };
+        gsap.to(o, { v: to, duration: 2, ease: 'power3.out', onUpdate: function () { el.textContent = nf.format(Math.round(o.v)) + suf; } });
       });
-    });
-
-    /* link ativo no menu */
-    ['estoque', 'financiamento', 'vender', 'loja', 'contato'].forEach(function (id) {
-      var link = $('.nav-side a[href="#' + id + '"]');
-      ScrollTrigger.create({ trigger: '#' + id, start: 'top 45%', end: 'bottom 45%', onToggle: function (s) { if (link) link.classList.toggle('on', s.isActive); } });
-    });
-
-    /* botoes magneticos (so em ponteiro fino) */
-    if (window.matchMedia('(pointer: fine)').matches) {
-      $$('.ht-foot .btn, .sell-actions .btn').forEach(function (b) {
-        var qx = gsap.quickTo(b, 'x', { duration: .5, ease: 'power3' }), qy = gsap.quickTo(b, 'y', { duration: .5, ease: 'power3' });
-        b.addEventListener('pointermove', function (e) { var r = b.getBoundingClientRect(); qx((e.clientX - r.left - r.width / 2) * .18); qy((e.clientY - r.top - r.height / 2) * .25); });
-        b.addEventListener('pointerleave', function () { qx(0); qy(0); });
-      });
-    }
+    }, { threshold: .6 });
+    $$('.count').forEach(function (el) { cio.observe(el); });
   }
 
   /* ---------- inicializacao ---------- */
@@ -839,24 +814,25 @@
   function boot() {
     applyUrlParams();
     applyBrand();
-    bindFilters(); bindSim(); bindForms(); bindCarousel(); bindBrandForm();
+    bindFilters(); bindSim(); bindForms(); bindCarousel(); bindBrandForm(); bindHero(); bindVehicle();
     showSkeleton();
     initMotion();
-    initStory();
+    initReveal();
+    route({ silent: true });
 
     API.listar().then(function (list) {
       cars = list;
       buildCards();
       populateFilters();
       applyFilters(false);
-      buildSim(); buildTestDrive(); syncFavs();
-      bindHero(); buildHero(); introHero();
-      if (HAS_GSAP) { ScrollTrigger.refresh(); }
-      var h = location.hash.slice(1);
-      if (h && byId(h)) openModal(h);
+      buildSim(); syncFavs();
+      renderHome();
+      buildHero();
+      Photos.mount($('#aboutImg'), { fotos: window.MIDIA.sobre, marca: 'Carro', modelo: 'do estoque' }, { w: 1200 });
+      route({ silent: true });
+      if (onPage('inicio') && !hero.intro) introHero();
+      if (onPage('inicio') && hero.tween) hero.tween.resume();
     });
-
-    if (document.fonts && document.fonts.ready && HAS_GSAP) document.fonts.ready.then(function () { ScrollTrigger.refresh(); });
     setInterval(renderOpen, 60000);
   }
   boot();

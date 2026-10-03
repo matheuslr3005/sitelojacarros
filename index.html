@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Garagem Verona - Seminovos revisados</title>
-  <meta name="description" content="Seminovos com laudo cautelar, revisão completa e garantia. Veja o estoque, simule o financiamento e agende seu test-drive.">
+  <title>Preguinho Veículos - Seminovos revisados</title>
+  <meta name="description" content="Seminovos com laudo cautelar, revisão completa e garantia. Veja o estoque, simule o financiamento e venha fazer seu test drive.">
   <meta name="theme-color" content="#5f6062">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23fba500%27/%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/styles.css">
@@ -14,21 +14,21 @@
   </script>
 </head>
 <body>
-  <a class="skip" href="#estoque">Ir para o estoque</a>
+  <a class="skip" href="#/estoque">Ir para o estoque</a>
 
   <!-- NAVEGACAO -->
   <header class="nav" id="nav">
     <div class="nav-in">
       <nav class="nav-side nav-left" aria-label="Principal">
-        <a href="#loja">Sobre nós</a>
-        <a href="#estoque">Estoque</a>
-        <a href="#financiamento">Financiamento</a>
+        <a href="#/sobre" data-route="sobre">Sobre nós</a>
+        <a href="#/estoque" data-route="estoque">Estoque</a>
+        <a href="#/financiamento" data-route="financiamento">Financiamento</a>
       </nav>
-      <a class="wordmark" href="#topo" data-bind="nome" aria-label="Início">Garagem Verona</a>
+      <a class="wordmark" href="#/" data-bind="nome" aria-label="Início">Preguinho Veículos</a>
       <div class="nav-right">
         <nav class="nav-side" aria-label="Secundário">
-          <a href="#vender">Venda</a>
-          <a href="#contato">Contato</a>
+          <a href="#/venda" data-route="venda">Venda</a>
+          <a href="#/contato" data-route="contato">Contato</a>
         </nav>
         <div class="nav-tools">
           <button class="icon-btn" id="favBtn" type="button" aria-label="Ver favoritos" title="Favoritos">
@@ -43,277 +43,331 @@
     </div>
   </header>
   <nav class="mnav" id="mnav" aria-label="Menu" hidden>
-    <a href="#loja">Sobre nós</a><a href="#estoque">Estoque</a><a href="#financiamento">Financiamento</a><a href="#vender">Venda</a><a href="#contato">Contato</a>
+    <a href="#/">Início</a><a href="#/sobre">Sobre nós</a><a href="#/estoque">Estoque</a><a href="#/financiamento">Financiamento</a><a href="#/venda">Venda</a><a href="#/contato">Contato</a>
   </nav>
 
   <main id="topo">
-    <!-- HERO -->
-    <section class="hero" id="hero" aria-label="Carros em destaque">
-      <h1 class="sr"><span data-bind="nome">Garagem Verona</span>: seminovos revisados</h1>
-      <div class="hero-bg"></div>
-      <div class="hero-slash" aria-hidden="true"><i></i><i></i></div>
-      <div class="hero-stage" id="heroStage" aria-live="polite"></div>
-      <div class="hero-text">
-        <div class="ht-a" id="htA">&nbsp;</div>
-        <div class="ht-b" id="htB">&nbsp;</div>
-        <div class="ht-c" id="htC">&nbsp;</div>
-        <div class="ht-foot">
-          <strong class="ht-price" id="htPrice"></strong>
-          <button class="btn btn-light" id="hcOpen" type="button">Ver detalhes</button>
-        </div>
-      </div>
-      <div class="hero-dots" id="heroTabs" role="tablist" aria-label="Carros em destaque"></div>
-    </section>
 
-    <!-- MARCAS -->
-    <section class="brands" aria-label="Marcas em estoque">
-      <div class="wrap">
-        <h2 class="brands-title">Marcas em estoque</h2>
-        <div class="brands-row" id="brandsRow"></div>
-      </div>
-    </section>
-
-    <!-- ESTOQUE -->
-    <section class="section" id="estoque" aria-labelledby="estoqueTitle">
-      <div class="wrap">
-        <h2 id="estoqueTitle" class="sec-title"><span class="thin">Conheça nosso</span><span class="amb">estoque</span></h2>
-        <p class="sec-sub">Confira as unidades disponíveis</p>
-
-        <div class="filters" id="filters">
-          <div class="f-top">
-            <label class="sk sk-search"><span class="sr">Buscar por marca, modelo ou versão</span>
-              <input id="fBusca" type="search" placeholder="Buscar por marca, modelo..." autocomplete="off">
-              <svg class="ic"><use href="#i-search"/></svg></label>
-            <label class="sk"><span class="sr">Marca</span>
-              <select id="fMarca"><option value="">Marca</option></select><svg class="ic"><use href="#i-down"/></svg></label>
-            <label class="sk"><span class="sr">Carroceria</span>
-              <select id="fCarroceria"><option value="">Carroceria</option></select><svg class="ic"><use href="#i-down"/></svg></label>
-            <label class="sk"><span class="sr">Ordenar por</span>
-              <select id="fOrdem">
-                <option value="destaque">Ordenar por</option>
-                <option value="menor">Menor preço</option>
-                <option value="maior">Maior preço</option>
-                <option value="novo">Mais novos</option>
-                <option value="km">Menor quilometragem</option>
-              </select><svg class="ic"><use href="#i-down"/></svg></label>
-          </div>
-          <button class="adv-btn" id="advBtn" type="button" aria-expanded="false" aria-controls="advBox">Filtro avançado <svg class="ic"><use href="#i-down"/></svg></button>
-          <div class="f-adv" id="advBox" hidden>
-            <label class="field"><span class="field-label">Combustível</span>
-              <select id="fComb"><option value="">Todos</option></select></label>
-            <label class="field"><span class="field-label">Câmbio</span>
-              <select id="fCambio"><option value="">Todos</option></select></label>
-            <label class="field field-range"><span class="field-label">Preço até <output id="fPrecoOut">sem limite</output></span>
-              <input id="fPreco" type="range" min="60000" max="250000" step="5000" value="250000"></label>
+    <!-- ============ INICIO ============ -->
+    <div class="page" data-page="inicio">
+      <section class="hero" id="hero" aria-label="Carros em destaque">
+        <h1 class="sr"><span data-bind="nome">Preguinho Veículos</span>: seminovos revisados</h1>
+        <div class="hero-bg"></div>
+        <div class="hero-stage" id="heroStage" aria-live="polite"></div>
+        <div class="hero-shade"></div>
+        <div class="hero-text">
+          <div class="ht-a" id="htA">&nbsp;</div>
+          <div class="ht-b" id="htB">&nbsp;</div>
+          <div class="ht-c" id="htC">&nbsp;</div>
+          <div class="ht-foot">
+            <strong class="ht-price" id="htPrice"></strong>
+            <button class="btn btn-light" id="hcOpen" type="button">Ver detalhes</button>
           </div>
         </div>
+        <div class="hero-dots" id="heroTabs" role="tablist" aria-label="Carros em destaque"></div>
+      </section>
 
-        <div class="results-bar">
-          <p id="resultCount" class="results-count" aria-live="polite">Carregando estoque</p>
-          <button class="link-btn" id="fClear" type="button" hidden>Limpar filtros</button>
-        </div>
-
-        <div class="grid" id="grid" aria-busy="true"></div>
-        <div class="empty" id="empty" hidden>
-          <div class="empty-art"><svg class="ic"><use href="#i-car"/></svg></div>
-          <h3>Nenhum carro com esses filtros</h3>
-          <p>Tente ampliar a faixa de preço ou remover algum filtro. Também podemos procurar o carro para você.</p>
-          <div class="empty-actions">
-            <button class="btn btn-primary" id="emptyReset" type="button">Limpar filtros</button>
-            <a class="btn btn-ghost" data-wa data-msg="Olá! Não encontrei o carro que procuro no site. Podem me ajudar?" href="#" target="_blank" rel="noopener">Pedir uma busca</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- POR QUE AQUI (pinned story) -->
-    <section class="story" id="porque" aria-labelledby="storyTitle">
-      <div class="story-pin">
-        <div class="wrap story-top">
-          <h2 id="storyTitle" class="sec-title sec-title-left"><span class="thin">O que vem com</span><span class="amb">todo carro da casa</span></h2>
-        </div>
-        <div class="story-road" id="storyRoad">
-          <div class="story-car" id="storyCar"></div>
-          <div class="road-line"></div>
-        </div>
-        <div class="wrap story-cols" id="storyCols">
-          <article class="story-item">
-            <svg class="ic ic-lg"><use href="#i-seal"/></svg>
-            <h3>Laudo cautelar aprovado</h3>
-            <p>Estrutura, motor e histórico de sinistro conferidos antes de o carro entrar no estoque.</p>
-          </article>
-          <article class="story-item">
-            <svg class="ic ic-lg"><use href="#i-wrench"/></svg>
-            <h3>Revisão e 90 dias de garantia</h3>
-            <p>Itens de desgaste trocados na nossa oficina e garantia de motor e câmbio por escrito.</p>
-          </article>
-          <article class="story-item">
-            <svg class="ic ic-lg"><use href="#i-key"/></svg>
-            <h3>Documentação resolvida</h3>
-            <p>Transferência, vistoria e financiamento ficam com a nossa equipe. Você só retira a chave.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- SOBRE (A LOJA) -->
-    <section class="section" id="loja" aria-labelledby="lojaTitle">
-      <div class="wrap">
-        <div class="about">
-          <div class="about-copy">
-            <h2 id="lojaTitle" class="sec-title"><span class="thin">Mais do que vender carro,</span><span class="amb">uma conversa franca</span></h2>
-            <p>A <span data-bind="nome">Garagem Verona</span> começou em <span data-bind="fundacao">2009</span> com seis carros num terreno alugado e a regra de nunca vender o que não colocaríamos na garagem de casa.</p>
-            <p>Hoje são 1.800 m² de showroom, oficina própria e uma equipe que atende cada cliente pelo nome. Aqui você fala com quem escolheu, revisou e conhece cada carro do estoque.</p>
-            <a class="btn btn-ghost" href="#contato">Visite a loja</a>
-          </div>
-          <div class="about-art" id="aboutArt" aria-hidden="true">
-            <span class="vert" data-bind="nome"></span>
-          </div>
-        </div>
-        <div class="stats">
-          <div><b class="count" data-to="4300" data-suffix="+">0</b><span>carros entregues</span></div>
-          <div><b class="count" data-to="97" data-suffix="%">0</b><span>de clientes que indicam a loja</span></div>
-          <div><b class="count" data-to="1800" data-suffix=" m²">0</b><span>de showroom e oficina própria</span></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- FINANCIAMENTO -->
-    <section class="section section-alt" id="financiamento" aria-labelledby="finTitle" style="background:var(--bg-2)">
-      <div class="wrap fin-grid">
-        <div class="fin-copy">
-          <h2 id="finTitle" class="sec-title sec-title-left"><span class="thin">Veja a parcela</span><span class="amb">antes de sair de casa</span></h2>
-          <p class="sec-sub">Escolha um carro do estoque, defina a entrada e o prazo. A simulação é imediata e a análise de crédito é feita com os principais bancos.</p>
-          <ul class="ticks">
-            <li><svg class="ic"><use href="#i-check"/></svg>Entrada a partir de 20% do valor</li>
-            <li><svg class="ic"><use href="#i-check"/></svg>Prazos de 12 a 60 meses</li>
-            <li><svg class="ic"><use href="#i-check"/></svg>Aceitamos seu carro como parte do pagamento</li>
-          </ul>
-        </div>
-        <div class="sim" id="sim">
-          <label class="field"><span class="field-label">Veículo</span><select id="sCar"></select></label>
-          <div class="sim-row">
-            <label class="field field-range"><span class="field-label">Entrada <output id="sEntOut">30%</output></span>
-              <input id="sEnt" type="range" min="20" max="80" step="5" value="30"></label>
-          </div>
-          <div class="field"><span class="field-label">Prazo</span>
-            <div class="chips" id="sPrazo" role="group" aria-label="Prazo em meses"></div>
-          </div>
-          <div class="sim-result">
-            <span class="sim-label">Parcela estimada</span>
-            <div class="sim-value"><span class="cur">R$</span><span id="sParcela">0</span><span class="per">/mês</span></div>
-            <dl class="sim-dl">
-              <div><dt>Valor do carro</dt><dd id="sPreco">-</dd></div>
-              <div><dt>Entrada</dt><dd id="sEntrada">-</dd></div>
-              <div><dt>Financiado</dt><dd id="sFin">-</dd></div>
-            </dl>
-          </div>
-          <a class="btn btn-primary btn-block" id="sSend" data-wa href="#" target="_blank" rel="noopener">Enviar simulação à loja</a>
-          <p class="fine" id="sFine">Simulação ilustrativa. Valores sujeitos à análise de crédito.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- VENDA SEU CARRO -->
-    <section id="vender" aria-labelledby="venderTitle">
-      <div class="sell-banner">
+      <section class="brands" aria-label="Marcas em estoque">
         <div class="wrap">
-          <h2 id="venderTitle"><span class="thin">Pensando em</span><span class="bold">vender seu veículo?</span></h2>
-          <p class="sell-sub">Preencha os dados e receba a avaliação pelo WhatsApp em até uma hora, em horário comercial.</p>
+          <h2 class="brands-title">Marcas em estoque</h2>
+          <div class="brands-row" id="brandsRow"></div>
         </div>
-      </div>
-      <div class="wrap sell-form-wrap">
-        <form class="sell-form" id="sellForm" novalidate>
-          <h3 class="slashes">Dados pessoais</h3>
-          <label class="field span6"><span class="field-label">Nome</span><input name="nome" autocomplete="name" required><span class="field-err" hidden></span></label>
-          <label class="field span3"><span class="field-label">Telefone</span><input name="telefone" inputmode="tel" autocomplete="tel" required><span class="field-err" hidden></span></label>
-          <label class="field span3"><span class="field-label">E-mail (opcional)</span><input name="email" type="email" autocomplete="email"><span class="field-err" hidden></span></label>
-          <h3 class="slashes">Dados do veículo</h3>
-          <label class="field span3"><span class="field-label">Marca</span><input name="marca" required autocomplete="off"><span class="field-err" hidden></span></label>
-          <label class="field span3"><span class="field-label">Modelo</span><input name="modelo" required autocomplete="off"><span class="field-err" hidden></span></label>
-          <label class="field span2"><span class="field-label">Ano de fabricação</span><input name="ano" inputmode="numeric" maxlength="4" required><span class="field-err" hidden></span></label>
-          <label class="field span2"><span class="field-label">Quilometragem</span><input name="km" inputmode="numeric" required><span class="field-err" hidden></span></label>
-          <label class="field span2"><span class="field-label">Versão</span><input name="versao" autocomplete="off"><span class="field-err" hidden></span></label>
-          <label class="field span6"><span class="field-label">Mensagem (opcional)</span><textarea name="mensagem"></textarea></label>
-          <div class="consent-wrap">
-            <label class="consent"><input type="checkbox" name="privacidade" required> Li e aceito os termos da política de privacidade.</label>
-            <span class="field-err" id="consentErr" hidden>Marque para continuar.</span>
-          </div>
-          <div class="sell-actions"><button class="btn btn-primary btn-lg" type="submit">Enviar</button></div>
-        </form>
-        <div class="sell-ok" id="sellOk" hidden>
-          <svg class="ic ic-lg"><use href="#i-check"/></svg>
-          <h3>Pedido pronto para enviar</h3>
-          <p>Abra o WhatsApp para mandar os dados do seu carro. Respondemos com a avaliação em até uma hora.</p>
-          <div class="sell-ok-actions">
-            <a class="btn btn-primary" id="sellWa" data-wa href="#" target="_blank" rel="noopener">Abrir WhatsApp</a>
-            <button class="link-btn" id="sellAgain" type="button">Avaliar outro carro</button>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- DEPOIMENTOS -->
-    <section class="section section-tight" id="depoimentos" aria-labelledby="depTitle" style="padding-top:clamp(64px,9vw,110px)">
-      <div class="wrap">
-        <div class="dep-head">
-          <h2 id="depTitle" class="sec-title sec-title-left"><span class="thin">Quem já saiu</span><span class="amb">daqui dirigindo</span></h2>
-          <div class="dep-nav">
-            <button class="icon-btn" id="depPrev" type="button" aria-label="Depoimento anterior"><svg class="ic flip"><use href="#i-arrow"/></svg></button>
-            <button class="icon-btn" id="depNext" type="button" aria-label="Próximo depoimento"><svg class="ic"><use href="#i-arrow"/></svg></button>
+      <section class="section" aria-labelledby="destTitle">
+        <div class="wrap">
+          <h2 id="destTitle" class="sec-title"><span class="thin">Conheça nossos</span><span class="amb">destaques</span></h2>
+          <div class="grid grid-home" id="homeGrid"></div>
+          <div class="center-cta"><a class="btn btn-primary btn-lg" href="#/estoque">Ver estoque completo</a></div>
+        </div>
+      </section>
+
+      <section class="promise" aria-labelledby="promTitle">
+        <div class="wrap promise-grid">
+          <div class="promise-img art" id="promiseImg" role="img" aria-label="Carro revisado do estoque"></div>
+          <div class="promise-copy">
+            <h2 id="promTitle" class="sec-title sec-title-left"><span class="thin">O que vem com</span><span class="amb">todo carro da casa</span></h2>
+            <ul class="promise-list">
+              <li><svg class="ic ic-lg"><use href="#i-seal"/></svg><div><h3>Laudo cautelar aprovado</h3><p>Estrutura, motor e histórico de sinistro conferidos antes de o carro entrar no estoque.</p></div></li>
+              <li><svg class="ic ic-lg"><use href="#i-wrench"/></svg><div><h3>Revisão e 90 dias de garantia</h3><p>Itens de desgaste trocados na nossa oficina e garantia de motor e câmbio por escrito.</p></div></li>
+              <li><svg class="ic ic-lg"><use href="#i-key"/></svg><div><h3>Documentação resolvida</h3><p>Transferência, vistoria e financiamento ficam com a nossa equipe. Você só retira a chave.</p></div></li>
+            </ul>
           </div>
         </div>
-      </div>
-      <div class="dep-track" id="depTrack" tabindex="0" aria-label="Depoimentos de clientes">
-        <figure class="quote"><blockquote>“Levei a Compass para o meu mecânico antes de fechar e ele não achou nada. Tudo que prometeram estava no laudo.”</blockquote><figcaption><span class="avatar" style="--h:30">MT</span><span><b>Marcelo Tavares</b>comprou uma Jeep Compass</span></figcaption></figure>
-        <figure class="quote"><blockquote>“Vendi meu carro antigo e financiei o novo no mesmo dia. Não precisei ir a banco nenhum.”</blockquote><figcaption><span class="avatar" style="--h:200">PW</span><span><b>Patrícia Weber</b>trocou por um Corolla</span></figcaption></figure>
-        <figure class="quote"><blockquote>“Já é o terceiro carro que levo daqui. Quando tem problema, ligo e resolvem sem enrolar.”</blockquote><figcaption><span class="avatar" style="--h:140">JD</span><span><b>Jorge Dall'Agnol</b>cliente desde 2014</span></figcaption></figure>
-        <figure class="quote"><blockquote>“Escolhi pelo site, marquei o test-drive pelo WhatsApp e saí com o carro na sexta.”</blockquote><figcaption><span class="avatar" style="--h:290">AB</span><span><b>Aline Bittencourt</b>comprou um Polo GTS</span></figcaption></figure>
-        <figure class="quote"><blockquote>“Preço justo e atendimento sem pressão. Me deixaram dirigir o quanto eu quis antes de decidir.”</blockquote><figcaption><span class="avatar" style="--h:60">RS</span><span><b>Rafael Soares</b>comprou uma Hilux</span></figcaption></figure>
-      </div>
-    </section>
+      </section>
 
-    <!-- CONTATO -->
-    <section class="section" id="contato" aria-labelledby="contatoTitle">
-      <div class="wrap contact-grid">
-        <div class="contact-info">
-          <h2 id="contatoTitle" class="sec-title"><span class="thin">Venha dirigir</span><span class="amb">o carro</span></h2>
-          <p class="open-status" id="openStatus"><span class="live-dot" aria-hidden="true"></span><span id="openText">Verificando horário</span></p>
-          <dl class="info-list">
-            <div><dt><svg class="ic"><use href="#i-pin"/></svg>Endereço</dt><dd><span data-bind="endereco"></span><br><span data-bind="cidade"></span></dd></div>
-            <div><dt><svg class="ic"><use href="#i-phone"/></svg>Telefone</dt><dd><a data-bind-href="tel" data-bind="telefone" href="#"></a></dd></div>
-            <div><dt><svg class="ic"><use href="#i-clock"/></svg>Horários</dt><dd id="horarios"></dd></div>
-          </dl>
-          <form class="td-form" id="tdForm" novalidate>
-            <h3>Agendar test-drive</h3>
-            <label class="field"><span class="field-label">Veículo</span><select name="carro" id="tdCar"></select></label>
-            <div class="td-row">
-              <label class="field"><span class="field-label">Dia</span><select name="dia" id="tdDia"></select></label>
-              <label class="field"><span class="field-label">Horário</span><select name="hora" id="tdHora"></select></label>
+      <section class="sell-banner" aria-labelledby="bannerTitle">
+        <div class="wrap banner-row">
+          <h2 id="bannerTitle"><span class="thin">Pensando em</span><span class="bold">vender seu veículo?</span></h2>
+          <a class="btn btn-dark btn-lg" href="#/venda">Avalie conosco</a>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ ESTOQUE ============ -->
+    <div class="page" data-page="estoque" hidden>
+      <section class="section page-top" aria-labelledby="estoqueTitle">
+        <div class="wrap">
+          <h1 id="estoqueTitle" class="sec-title"><span class="thin">Conheça nosso</span><span class="amb">estoque</span></h1>
+          <p class="sec-sub">Confira as unidades disponíveis</p>
+
+          <div class="filters" id="filters">
+            <div class="f-top">
+              <label class="sk sk-search"><span class="sr">Buscar por marca, modelo ou versão</span>
+                <input id="fBusca" type="search" placeholder="Buscar por marca, modelo..." autocomplete="off">
+                <svg class="ic"><use href="#i-search"/></svg></label>
+              <label class="sk"><span class="sr">Marca</span>
+                <select id="fMarca"><option value="">Marca</option></select><svg class="ic"><use href="#i-down"/></svg></label>
+              <label class="sk"><span class="sr">Carroceria</span>
+                <select id="fCarroceria"><option value="">Carroceria</option></select><svg class="ic"><use href="#i-down"/></svg></label>
+              <label class="sk"><span class="sr">Ordenar por</span>
+                <select id="fOrdem">
+                  <option value="destaque">Ordenar por</option>
+                  <option value="menor">Menor preço</option>
+                  <option value="maior">Maior preço</option>
+                  <option value="novo">Mais novos</option>
+                  <option value="km">Menor quilometragem</option>
+                </select><svg class="ic"><use href="#i-down"/></svg></label>
             </div>
-            <label class="field"><span class="field-label">Seu nome</span><input name="nome" required autocomplete="name"><span class="field-err" hidden></span></label>
-            <button class="btn btn-primary btn-block" type="submit">Agendar test-drive</button>
-            <p class="fine" id="tdOk" hidden></p>
+            <button class="adv-btn" id="advBtn" type="button" aria-expanded="false" aria-controls="advBox">Filtro avançado <svg class="ic"><use href="#i-down"/></svg></button>
+            <div class="f-adv" id="advBox" hidden>
+              <label class="field"><span class="field-label">Combustível</span>
+                <select id="fComb"><option value="">Todos</option></select></label>
+              <label class="field"><span class="field-label">Câmbio</span>
+                <select id="fCambio"><option value="">Todos</option></select></label>
+              <label class="field field-range"><span class="field-label">Preço até <output id="fPrecoOut">sem limite</output></span>
+                <input id="fPreco" type="range" min="60000" max="250000" step="5000" value="250000"></label>
+            </div>
+          </div>
+
+          <div class="results-bar">
+            <p id="resultCount" class="results-count" aria-live="polite">Carregando estoque</p>
+            <button class="link-btn" id="fClear" type="button" hidden>Limpar filtros</button>
+          </div>
+
+          <div class="grid" id="grid" aria-busy="true"></div>
+          <div class="empty" id="empty" hidden>
+            <div class="empty-art"><svg class="ic"><use href="#i-car"/></svg></div>
+            <h3>Nenhum carro com esses filtros</h3>
+            <p>Tente ampliar a faixa de preço ou remover algum filtro. Também podemos procurar o carro para você.</p>
+            <div class="empty-actions">
+              <button class="btn btn-primary" id="emptyReset" type="button">Limpar filtros</button>
+              <a class="btn btn-ghost" data-wa data-msg="Olá! Não encontrei o carro que procuro no site. Podem me ajudar?" href="#" target="_blank" rel="noopener">Pedir uma busca</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ VEICULO ============ -->
+    <div class="page" data-page="veiculo" hidden>
+      <section class="section page-top" id="vehicle" aria-label="Detalhes do veículo">
+        <div class="wrap">
+          <div class="crumbs">
+            <a href="#/estoque">Estoque</a><span aria-hidden="true">/</span><b id="vCrumb"></b>
+            <span class="crumbs-nav">
+              <button class="icon-btn" id="vPrev" type="button" aria-label="Carro anterior"><svg class="ic flip"><use href="#i-arrow"/></svg></button>
+              <button class="icon-btn" id="vNext" type="button" aria-label="Próximo carro"><svg class="ic"><use href="#i-arrow"/></svg></button>
+            </span>
+          </div>
+
+          <div class="v-grid">
+            <div class="v-gallery">
+              <div class="v-main art" id="vgMain"></div>
+              <div class="v-thumbs" id="vgThumbs" role="tablist" aria-label="Fotos do veículo"></div>
+            </div>
+            <div class="v-info">
+              <p class="m-brand" id="vBrand"></p>
+              <h1 class="m-title" id="vTitle"></h1>
+              <p class="m-version" id="vVersion"></p>
+              <div class="m-price-row">
+                <div class="m-price" id="vPrice"></div>
+                <div class="m-parcela" id="vParcela"></div>
+              </div>
+              <div class="m-actions">
+                <a class="btn btn-primary" id="vWa" data-wa href="#" target="_blank" rel="noopener"><svg class="ic"><use href="#i-wa"/></svg>Falar no WhatsApp</a>
+                <a class="btn btn-ghost" id="vTest" data-wa href="#" target="_blank" rel="noopener">Fazer test drive</a>
+                <button class="icon-btn" id="vFav" type="button" aria-label="Favoritar" aria-pressed="false"><svg class="ic"><use href="#i-heart"/></svg></button>
+              </div>
+              <a class="link-btn" id="vSim" href="#/financiamento">Simular o financiamento deste carro</a>
+              <dl class="m-specs" id="vSpecs"></dl>
+            </div>
+          </div>
+
+          <div class="v-detail">
+            <div>
+              <h2 class="slashes v-h">Sobre o carro</h2>
+              <p class="m-desc" id="vDesc"></p>
+            </div>
+            <div>
+              <h2 class="slashes v-h">Opcionais e equipamentos</h2>
+              <ul class="v-opts" id="vOpts"></ul>
+            </div>
+          </div>
+
+          <div class="v-related">
+            <h2 class="sec-title sec-title-left"><span class="thin">Outros carros que</span><span class="amb">podem te interessar</span></h2>
+            <div class="grid grid-home" id="relGrid"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ FINANCIAMENTO ============ -->
+    <div class="page" data-page="financiamento" hidden>
+      <section class="section page-top" aria-labelledby="finTitle">
+        <div class="wrap fin-grid">
+          <div class="fin-copy">
+            <h1 id="finTitle" class="sec-title sec-title-left"><span class="thin">Financiamento</span><span class="amb">sem complicação</span></h1>
+            <p class="fin-lead">Trabalhamos com os principais bancos do país. Você faz a simulação aqui, nossa equipe leva a proposta para vários deles e você escolhe a melhor condição. Assim, você já sai da loja com o financiamento resolvido.</p>
+            <div class="fin-info">
+              <div><h3 class="slashes">Taxas</h3><p><b>A partir de <span data-juros>1,89</span>% ao mês.</b> A taxa final depende da análise de crédito, do prazo e do perfil de cada cliente.</p></div>
+              <div><h3 class="slashes">Prazos</h3><p>De 12 a 60 meses, com parcelas que cabem no seu orçamento.</p></div>
+              <div><h3 class="slashes">Entrada</h3><p>A partir de 20% do valor do veículo. Também aceitamos o seu carro como parte do pagamento.</p></div>
+              <div><h3 class="slashes">Bancos</h3><p>Principais bancos do país, com análise de crédito rápida e acompanhamento da nossa equipe até a liberação.</p></div>
+            </div>
+          </div>
+          <div class="sim" id="sim">
+            <label class="field"><span class="field-label">Veículo</span><select id="sCar"></select></label>
+            <div class="sim-row">
+              <label class="field field-range"><span class="field-label">Entrada <output id="sEntOut">30%</output></span>
+                <input id="sEnt" type="range" min="20" max="80" step="5" value="30"></label>
+            </div>
+            <div class="field"><span class="field-label">Prazo</span>
+              <div class="chips" id="sPrazo" role="group" aria-label="Prazo em meses"></div>
+            </div>
+            <div class="sim-result">
+              <span class="sim-label">Parcela estimada</span>
+              <div class="sim-value"><span class="cur">R$</span><span id="sParcela">0</span><span class="per">/mês</span></div>
+              <dl class="sim-dl">
+                <div><dt>Valor do carro</dt><dd id="sPreco">-</dd></div>
+                <div><dt>Entrada</dt><dd id="sEntrada">-</dd></div>
+                <div><dt>Financiado</dt><dd id="sFin">-</dd></div>
+              </dl>
+            </div>
+            <a class="btn btn-primary btn-block" id="sSend" data-wa href="#" target="_blank" rel="noopener">Enviar simulação à loja</a>
+            <p class="fine" id="sFine">Simulação ilustrativa. Valores sujeitos à análise de crédito.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ VENDA ============ -->
+    <div class="page" data-page="venda" hidden>
+      <section class="page-top-banner" aria-labelledby="venderTitle">
+        <div class="sell-banner">
+          <div class="wrap">
+            <h1 id="venderTitle"><span class="thin">Pensando em</span><span class="bold">vender seu veículo?</span></h1>
+            <p class="sell-sub">Preencha os dados e receba a avaliação pelo WhatsApp em até uma hora, em horário comercial.</p>
+          </div>
+        </div>
+        <div class="wrap sell-form-wrap">
+          <form class="sell-form" id="sellForm" novalidate>
+            <h2 class="slashes">Dados pessoais</h2>
+            <label class="field span6"><span class="field-label">Nome</span><input name="nome" autocomplete="name" required><span class="field-err" hidden></span></label>
+            <label class="field span3"><span class="field-label">Telefone</span><input name="telefone" inputmode="tel" autocomplete="tel" required><span class="field-err" hidden></span></label>
+            <label class="field span3"><span class="field-label">E-mail (opcional)</span><input name="email" type="email" autocomplete="email"><span class="field-err" hidden></span></label>
+            <h2 class="slashes">Dados do veículo</h2>
+            <label class="field span3"><span class="field-label">Marca</span><input name="marca" required autocomplete="off"><span class="field-err" hidden></span></label>
+            <label class="field span3"><span class="field-label">Modelo</span><input name="modelo" required autocomplete="off"><span class="field-err" hidden></span></label>
+            <label class="field span2"><span class="field-label">Ano de fabricação</span><input name="ano" inputmode="numeric" maxlength="4" required><span class="field-err" hidden></span></label>
+            <label class="field span2"><span class="field-label">Quilometragem</span><input name="km" inputmode="numeric" required><span class="field-err" hidden></span></label>
+            <label class="field span2"><span class="field-label">Versão</span><input name="versao" autocomplete="off"><span class="field-err" hidden></span></label>
+            <label class="field span6"><span class="field-label">Mensagem (opcional)</span><textarea name="mensagem"></textarea></label>
+            <div class="consent-wrap">
+              <label class="consent"><input type="checkbox" name="privacidade" required> Li e aceito os termos da política de privacidade.</label>
+              <span class="field-err" id="consentErr" hidden>Marque para continuar.</span>
+            </div>
+            <div class="sell-actions"><button class="btn btn-primary btn-lg" type="submit">Enviar</button></div>
           </form>
+          <div class="sell-ok" id="sellOk" hidden>
+            <svg class="ic ic-lg"><use href="#i-check"/></svg>
+            <h2>Pedido pronto para enviar</h2>
+            <p>Abra o WhatsApp para mandar os dados do seu carro. Respondemos com a avaliação em até uma hora.</p>
+            <div class="sell-ok-actions">
+              <a class="btn btn-primary" id="sellWa" data-wa href="#" target="_blank" rel="noopener">Abrir WhatsApp</a>
+              <button class="link-btn" id="sellAgain" type="button">Avaliar outro carro</button>
+            </div>
+          </div>
         </div>
-        <div class="map" id="map">
-          <iframe id="mapFrame" title="Mapa com a localização da loja" loading="lazy" referrerpolicy="no-referrer"></iframe>
-          <a class="btn btn-ghost btn-sm map-link" id="mapLink" target="_blank" rel="noopener" href="#">Abrir no mapa</a>
+      </section>
+    </div>
+
+    <!-- ============ SOBRE NOS ============ -->
+    <div class="page" data-page="sobre" hidden>
+      <section class="section page-top" aria-labelledby="lojaTitle">
+        <div class="wrap">
+          <div class="about">
+            <div class="about-copy">
+              <h1 id="lojaTitle" class="sec-title"><span class="thin">Mais do que vender carro,</span><span class="amb">uma conversa franca</span></h1>
+              <p>A <span data-bind="nome">Preguinho Veículos</span> começou em <span data-bind="fundacao">2009</span> com seis carros num terreno alugado e a regra de nunca vender o que não colocaríamos na garagem de casa.</p>
+              <p>Hoje são 1.800 m² de showroom, oficina própria e uma equipe que atende cada cliente pelo nome. Aqui você fala com quem escolheu, revisou e conhece cada carro do estoque.</p>
+              <a class="btn btn-ghost" href="#/contato">Visite a loja</a>
+            </div>
+            <div class="about-img art" id="aboutImg" role="img" aria-label="Carro do estoque"></div>
+          </div>
+          <div class="stats">
+            <div><b class="count" data-to="4300" data-suffix="+">0</b><span>carros entregues</span></div>
+            <div><b class="count" data-to="97" data-suffix="%">0</b><span>de clientes que indicam a loja</span></div>
+            <div><b class="count" data-to="1800" data-suffix=" m²">0</b><span>de showroom e oficina própria</span></div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <section class="section section-tight" aria-labelledby="depTitle" style="padding-top:0">
+        <div class="wrap">
+          <div class="dep-head">
+            <h2 id="depTitle" class="sec-title sec-title-left"><span class="thin">Quem já saiu</span><span class="amb">daqui dirigindo</span></h2>
+            <div class="dep-nav">
+              <button class="icon-btn" id="depPrev" type="button" aria-label="Depoimento anterior"><svg class="ic flip"><use href="#i-arrow"/></svg></button>
+              <button class="icon-btn" id="depNext" type="button" aria-label="Próximo depoimento"><svg class="ic"><use href="#i-arrow"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="dep-track" id="depTrack" tabindex="0" aria-label="Depoimentos de clientes">
+          <figure class="quote"><blockquote>“Levei a Compass para o meu mecânico antes de fechar e ele não achou nada. Tudo que prometeram estava no laudo.”</blockquote><figcaption><span class="avatar" style="--h:30">MT</span><span><b>Marcelo Tavares</b>comprou uma Jeep Compass</span></figcaption></figure>
+          <figure class="quote"><blockquote>“Vendi meu carro antigo e financiei o novo no mesmo dia. Não precisei ir a banco nenhum.”</blockquote><figcaption><span class="avatar" style="--h:200">PW</span><span><b>Patrícia Weber</b>trocou por um Corolla</span></figcaption></figure>
+          <figure class="quote"><blockquote>“Já é o terceiro carro que levo daqui. Quando tem problema, ligo e resolvem sem enrolar.”</blockquote><figcaption><span class="avatar" style="--h:140">JD</span><span><b>Jorge Dall'Agnol</b>cliente desde 2014</span></figcaption></figure>
+          <figure class="quote"><blockquote>“Escolhi pelo site, marquei o test drive pelo WhatsApp e saí com o carro na sexta.”</blockquote><figcaption><span class="avatar" style="--h:290">AB</span><span><b>Aline Bittencourt</b>comprou um T-Cross</span></figcaption></figure>
+          <figure class="quote"><blockquote>“Preço justo e atendimento sem pressão. Me deixaram dirigir o quanto eu quis antes de decidir.”</blockquote><figcaption><span class="avatar" style="--h:60">RS</span><span><b>Rafael Soares</b>comprou uma Hilux</span></figcaption></figure>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ CONTATO ============ -->
+    <div class="page" data-page="contato" hidden>
+      <section class="section page-top" aria-labelledby="contatoTitle">
+        <div class="wrap contact-grid">
+          <div class="contact-info">
+            <h1 id="contatoTitle" class="sec-title"><span class="thin">Venha fazer</span><span class="amb">seu test drive</span></h1>
+            <p class="open-status" id="openStatus"><span class="live-dot" aria-hidden="true"></span><span id="openText">Verificando horário</span></p>
+            <dl class="info-list">
+              <div><dt><svg class="ic"><use href="#i-pin"/></svg>Endereço</dt><dd><span data-bind="endereco"></span><br><span data-bind="cidade"></span></dd></div>
+              <div><dt><svg class="ic"><use href="#i-phone"/></svg>Telefone</dt><dd><a data-bind-href="tel" data-bind="telefone" href="#"></a></dd></div>
+              <div><dt><svg class="ic"><use href="#i-clock"/></svg>Horários</dt><dd id="horarios"></dd></div>
+            </dl>
+            <a class="btn btn-primary" data-wa data-msg="Olá! Quero fazer um test drive. Quais horários vocês têm disponíveis?" href="#" target="_blank" rel="noopener"><svg class="ic"><use href="#i-wa"/></svg>Falar no WhatsApp</a>
+          </div>
+          <div class="map" id="map">
+            <iframe id="mapFrame" title="Mapa com a localização da loja" loading="lazy" referrerpolicy="no-referrer"></iframe>
+            <a class="btn btn-ghost btn-sm map-link" id="mapLink" target="_blank" rel="noopener" href="#">Abrir no mapa</a>
+          </div>
+        </div>
+      </section>
+    </div>
+
   </main>
 
   <footer class="footer">
     <div class="wrap footer-in">
       <div class="footer-brand">
         <span class="mark2" aria-hidden="true"><i></i><i></i></span>
-        <span class="wordmark" data-bind="nome">Garagem Verona</span>
+        <span class="wordmark" data-bind="nome">Preguinho Veículos</span>
       </div>
       <div class="footer-main">
         <p>Estoque selecionado, revisão completa e atendimento de quem conhece cada carro. Estamos prontos para encontrar o veículo certo para você.</p>
         <nav class="footer-links" aria-label="Rodapé">
-          <a href="#topo">Início</a><a href="#loja">Sobre nós</a><a href="#estoque">Estoque</a><a href="#vender">Vender</a><a href="#contato">Contato</a>
+          <a href="#/">Início</a><a href="#/sobre">Sobre nós</a><a href="#/estoque">Estoque</a><a href="#/financiamento">Financiamento</a><a href="#/venda">Venda</a><a href="#/contato">Contato</a>
         </nav>
         <div class="footer-cols">
           <div><h4 class="slashes">Visite nossa loja</h4><p data-bind="endereco"></p><p data-bind="cidade"></p></div>
@@ -325,36 +379,6 @@
   </footer>
 
   <a class="wa-float" data-wa data-msg="Olá! Vim pelo site e gostaria de falar com a loja." href="#" target="_blank" rel="noopener" aria-label="Falar no WhatsApp"><svg class="ic"><use href="#i-wa"/></svg></a>
-
-  <!-- MODAL DO VEICULO -->
-  <div class="modal" id="modal" hidden>
-    <div class="modal-scrim" data-close></div>
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="mTitle">
-      <button class="icon-btn modal-close" type="button" data-close aria-label="Fechar"><svg class="ic"><use href="#i-x"/></svg></button>
-      <div class="modal-media" id="mMedia"></div>
-      <div class="modal-body">
-        <div class="m-nav">
-          <button class="icon-btn" id="mPrev" type="button" aria-label="Carro anterior"><svg class="ic flip"><use href="#i-arrow"/></svg></button>
-          <button class="icon-btn" id="mNext" type="button" aria-label="Próximo carro"><svg class="ic"><use href="#i-arrow"/></svg></button>
-        </div>
-        <p class="m-brand" id="mBrand"></p>
-        <h3 class="m-title" id="mTitle"></h3>
-        <p class="m-version" id="mVersion"></p>
-        <div class="m-price-row">
-          <div class="m-price" id="mPrice"></div>
-          <div class="m-parcela" id="mParcela"></div>
-        </div>
-        <div class="m-actions">
-          <a class="btn btn-primary" id="mWa" data-wa href="#" target="_blank" rel="noopener"><svg class="ic"><use href="#i-wa"/></svg>Falar no WhatsApp</a>
-          <button class="btn btn-ghost" id="mTest" type="button">Agendar test-drive</button>
-          <button class="icon-btn" id="mFav" type="button" aria-label="Favoritar" aria-pressed="false"><svg class="ic"><use href="#i-heart"/></svg></button>
-        </div>
-        <dl class="m-specs" id="mSpecs"></dl>
-        <p class="m-desc" id="mDesc"></p>
-        <div class="m-opts" id="mOpts"></div>
-      </div>
-    </div>
-  </div>
 
   <!-- PAINEL DO LOJISTA (demo) -->
   <button class="dock" id="dockBtn" type="button" aria-expanded="false" aria-controls="panel"><svg class="ic"><use href="#i-sliders"/></svg><span>Painel do lojista</span></button>
@@ -421,7 +445,7 @@
   <script src="js/vendor/Flip.min.js"></script>
   <script src="js/data/estoque.js"></script>
   <script src="js/api.js"></script>
-  <script src="js/car-art.js"></script>
+  <script src="js/photos.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

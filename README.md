@@ -1,71 +1,69 @@
-# Site de loja de carros (modelo de demonstração)
+# Preguinho Veículos (site de demonstração para lojas de carros)
 
-Site interativo para apresentar a donos de lojas de carros que ainda não têm site, ou cujo site está desatualizado. A loja que aparece ("Garagem Verona") é fictícia e serve só de vitrine do modelo.
-
-Não precisa instalar nada: é HTML, CSS e JavaScript puros, com as bibliotecas já dentro do projeto. Dá para abrir o `index.html` direto, mas o melhor é servir por HTTP:
+Site para apresentar a donos de lojas de carros que ainda não têm site, ou cujo site está desatualizado. A loja que aparece ("Preguinho Veículos") é fictícia e serve de vitrine do modelo. É HTML, CSS e JavaScript puros, sem instalar nada.
 
 ```bash
 python3 -m http.server 8000
 # abra http://localhost:8000
 ```
 
-## O que o site tem
+Abra por um servidor como acima (ou por qualquer hospedagem estática). As fotos dos carros vêm da internet, então é preciso estar online.
 
-- Hero em tela cheia com o nome do carro em destaque (marca fina, modelo pesado), carros em destaque trocando sozinhos e parallax no mouse.
-- Estoque com busca, filtros (marca, carroceria e, em "Filtro avançado", combustível, câmbio e preço), ordenação e favoritos. Os cards se reorganizam com animação ao filtrar.
-- Página de detalhes do carro (modal) com especificações, opcionais, parcela estimada, WhatsApp com mensagem já preenchida e agendamento de test-drive. Setas do teclado navegam entre os carros.
-- Seção de rolagem animada ("o que vem com todo carro"), simulador de financiamento, faixa e formulário completo de venda (dados pessoais e do veículo), história da loja, depoimentos, mapa, horário com "aberto agora".
-- Botão flutuante do WhatsApp, tema claro (padrão) e escuro, responsivo e com respeito a `prefers-reduced-motion`.
+## Páginas
 
-## Estilo visual
+Cada item do menu abre a sua própria página (não é uma rolagem contínua):
 
-Página clara com navegação e rodapé cinza, acento amarelo-âmbar, botões e filtros em paralelogramo inclinado, cards quadrados com fio de cor sob a imagem e a marca de duas barras inclinadas nos títulos pequenos. Tipografia: Raleway (contraste entre peso 300 e 800) e Michroma para o nome da loja. A cor do acento é trocada em um lugar só (Painel do lojista, aba Personalizar, ou `--accent` em `css/styles.css`).
-
-## Painel do lojista (o botão no canto inferior esquerdo)
-
-É a ferramenta de venda da demonstração. Com ele você mostra ao dono da loja o site dele funcionando:
-
-- **Estoque:** marque um carro como vendido (ele sai do site com animação) ou mude o preço (atualiza em todo lugar).
-- **Personalizar:** troque nome, cidade, WhatsApp e cor da marca. O site inteiro muda na hora.
-- **Integração:** mostra o fluxo sistema da loja, conector, site, com botão "Sincronizar agora".
-
-Também dá para abrir já personalizado por link, útil para mandar antes da reunião:
-
-```
-index.html?loja=Auto%20Center%20Silveira&cor=3b82f6&cidade=Canoas%2C%20RS&whats=51988887777
-```
-
-As alterações ficam salvas no navegador. "Restaurar" volta ao padrão.
-
-## Como integrar com o sistema de estoque da loja
-
-Todo o site lê os dados por um único ponto, `js/api.js`. Hoje ele lê `js/data/estoque.js` (dados de demonstração). Para a loja real:
-
-1. Descubra de onde o estoque sai (API do sistema, planilha, feed XML ou JSON, exportação CSV).
-2. Reescreva `API.listar()` em `js/api.js` para buscar essa fonte e devolver uma lista de veículos no mesmo formato de `js/data/estoque.js`. Nada mais no site precisa mudar.
-3. Se a fonte exigir chave de acesso, o conector deve rodar num servidor pequeno (não no navegador) para não expor a chave.
-
-Formato de cada veículo: `id`, `marca`, `modelo`, `versao`, `ano`, `anoModelo`, `km`, `preco`, `combustivel`, `cambio`, `carroceria` (Hatch, Sedã, SUV ou Picape), `cor {nome, hex}`, `motor`, `potencia`, `portas`, `opcionais[]`, `descricao`, `destaque`, `vendido`, `fotos[]` e, opcional, `selo` (texto curto no canto da foto, ex.: "Blindado", "Único dono").
+| Página | O que tem |
+| --- | --- |
+| Início | Destaques em tela cheia, marcas, carros em destaque, "o que vem com todo carro" e chamada para vender |
+| Estoque | Busca, filtros (marca, carroceria e, em "Filtro avançado", combustível, câmbio e preço), ordenação e favoritos |
+| Veículo | Abre ao clicar num carro: galeria de fotos, preço, parcela, ficha técnica, opcionais, descrição, WhatsApp e outros carros |
+| Financiamento | Texto sobre taxas, prazos, entrada e bancos, mais o simulador de parcela |
+| Venda | Formulário completo (dados pessoais e do veículo) que monta a mensagem para o WhatsApp |
+| Sobre nós | História da loja, números e depoimentos |
+| Contato | Endereço, horários, "aberto agora", WhatsApp e mapa |
 
 ## Fotos
 
-Os carros não têm foto ainda. Enquanto `fotos` estiver vazio, o site desenha uma ilustração de estúdio na cor do carro (`js/car-art.js`). Para usar fotos reais, coloque os arquivos (por exemplo em `assets/carros/<id>/1.jpg`) e preencha `fotos: ["assets/carros/tcross-highline-22/1.jpg"]`. A foto entra por cima da ilustração com transição, e se o arquivo falhar a ilustração continua lá.
+Os carros usam fotos reais do Wikimedia Commons (licenças Creative Commons), carregadas direto da internet. **São de modelos parecidos, não do carro exato do estoque**, e servem só para a demonstração. Antes de usar com um cliente, troque pelas fotos da própria loja.
+
+Cada veículo tem uma lista `fotos` em `js/data/estoque.js`. O site usa a primeira que carregar, e as demais aparecem na galeria da página do veículo. Para usar fotos da loja, coloque os arquivos em `assets/carros/<id>/` e escreva `fotos: ["assets/carros/tcross-highline-22/1.jpg", "..."]`. Se nenhuma foto carregar, aparece um quadro neutro com "Foto em breve".
+
+## Painel do lojista (botão no canto inferior esquerdo)
+
+Ferramenta de venda da demonstração:
+
+- **Estoque:** marque um carro como vendido (ele sai do site) ou mude o preço.
+- **Personalizar:** troque nome, cidade, WhatsApp e cor da marca e o site inteiro muda na hora.
+- **Integração:** mostra o fluxo sistema da loja, conector, site, com botão "Sincronizar agora".
+
+Também dá para abrir já personalizado por link: `index.html?loja=Auto%20Center%20Silveira&cor=3b82f6&cidade=Canoas%2C%20RS&whats=51988887777`. As alterações ficam salvas no navegador.
+
+## Como integrar com o sistema de estoque da loja
+
+Todo o site lê os dados por um único ponto, `js/api.js`. Hoje ele lê `js/data/estoque.js` (dados de demonstração). Para a loja real, reescreva `API.listar()` para buscar do sistema dela (API, planilha, XML, JSON ou CSV) e devolver os veículos no mesmo formato. Nada no layout muda. Se a fonte exigir chave de acesso, o conector deve rodar num servidor pequeno e não no navegador.
+
+Formato de cada veículo: `id`, `marca`, `modelo`, `versao`, `ano`, `anoModelo`, `km`, `preco`, `combustivel`, `cambio`, `carroceria`, `motor`, `potencia`, `portas`, `opcionais[]`, `descricao`, `destaque`, `vendido`, `fotos[]` e, opcional, `selo` (texto no canto da foto, ex.: "Blindado").
 
 ## Antes de mostrar para um cliente
 
-- Todos os dados (veículos, preços, quilometragem, depoimentos, endereço, telefone, números como "4.300 carros entregues") são fictícios. Troque pelos da loja ou use o Painel de personalização.
-- O mapa usa OpenStreetMap em volta de um ponto de Porto Alegre. Ajuste `mapa` em `js/data/estoque.js` com a coordenada real.
-- A simulação de financiamento usa uma taxa ilustrativa de 1,89% ao mês (`jurosMensal`).
+- Veículos, preços, quilometragens, depoimentos, endereço, telefone e números como "4.300 carros entregues" são fictícios. Troque pelos da loja ou use o Painel de personalização.
+- O mapa usa OpenStreetMap em volta de um ponto de Porto Alegre. Ajuste `mapa` em `js/data/estoque.js`.
+- A simulação de financiamento usa taxa ilustrativa de 1,89% ao mês (`jurosMensal`) e o texto da página de Financiamento é genérico ("principais bancos"). Ajuste ao que a loja realmente trabalha.
+
+## Estilo visual
+
+Página clara com navegação e rodapé cinza, acento âmbar (trocável), botões e filtros em paralelogramo inclinado, cards quadrados com fio de cor sob a foto. Fontes: Raleway e Michroma.
 
 ## Estrutura
 
 ```
-index.html            marcação de todas as seções
+index.html            todas as páginas (uma <div class="page"> por rota)
 css/styles.css        tokens de tema, componentes e responsivo
-js/app.js             comportamento: filtros, modal, simulador, painel, animações
+js/app.js             rotas, filtros, página do veículo, simulador, painel, animações
 js/api.js             camada de dados (ponto de integração)
-js/data/estoque.js    loja e estoque de demonstração
-js/car-art.js         ilustração de estúdio e carregamento de fotos
+js/data/estoque.js    loja e estoque de demonstração, com as fotos
+js/photos.js          carregamento das fotos, com troca automática para a próxima
 js/icons.js           ícones (Phosphor, MIT)
 js/brands.js          logos de marcas (Simple Icons, CC0)
 js/vendor/            GSAP, ScrollTrigger e Flip
