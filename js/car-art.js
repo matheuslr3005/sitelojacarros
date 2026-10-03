@@ -84,7 +84,7 @@
       '<linearGradient id="' + id + 'glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a3947"/><stop offset="1" stop-color="#0a0f14"/></linearGradient>' +
       '<linearGradient id="' + id + 'rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6e8eb"/><stop offset=".5" stop-color="#8d9298"/><stop offset="1" stop-color="#d3d6da"/></linearGradient>' +
       '<linearGradient id="' + id + 'fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>' +
-      '<mask id="' + id + 'rm" maskUnits="userSpaceOnUse" x="0" y="' + gy + '" width="800" height="100"><rect x="0" y="' + gy + '" width="800" height="100" fill="url(#' + id + 'fade)"/></mask>' +
+      '<mask id="' + id + 'rm" maskUnits="userSpaceOnUse" x="0" y="' + gy + '" width="800" height="84"><rect x="0" y="' + gy + '" width="800" height="84" fill="url(#' + id + 'fade)"/></mask>' +
       '<clipPath id="' + id + 'clip"><path d="' + t.body + '"/></clipPath>' +
       '<filter id="' + id + 'blur" x="-10%" y="-200%" width="120%" height="500%"><feGaussianBlur stdDeviation="9"/></filter>' +
     '</defs>';
@@ -113,7 +113,7 @@
     t.seams.forEach(function (s) { g += '<path d="' + s + '" fill="none" stroke="#000" stroke-opacity=".35" stroke-width="1.6"/>'; });
     t.handles.forEach(function (p) { g += '<rect x="' + p[0] + '" y="' + p[1] + '" width="26" height="5" rx="2.5" fill="#000" opacity=".4"/>'; });
     g += '<path d="M' + t.mirror[0] + ' ' + (t.mirror[1] + 2) + ' C' + (t.mirror[0] + 12) + ' ' + (t.mirror[1] - 6) + ' ' + (t.mirror[0] + 30) + ' ' + (t.mirror[1] - 4) + ' ' + (t.mirror[0] + 32) + ' ' + (t.mirror[1] + 4) + ' L' + t.mirror[0] + ' ' + (t.mirror[1] + 10) + ' Z" fill="url(#' + id + 'paint)" stroke="#000" stroke-opacity=".3"/>';
-    if (t.rails) g += '<path d="M214 114 L420 110" stroke="#0a0a0b" stroke-width="5" stroke-linecap="round"/>';
+    if (t.rails) g += '<path d="M212 121 L420 116" stroke="#0a0a0b" stroke-width="4" stroke-linecap="round"/>';
     /* farol e lanterna */
     var hx = t.head[2];
     g += '<path d="M' + (hx - 30) + ' ' + t.head[1] + ' L' + (hx - 2) + ' ' + (t.head[1] + 8) + ' L' + (hx - 2) + ' ' + (t.head[1] + 18) + ' L' + (hx - 34) + ' ' + (t.head[1] + 12) + ' Z" fill="#f4f1e6"/>';

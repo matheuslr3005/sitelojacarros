@@ -13,8 +13,9 @@
   if (HAS_GSAP) gsap.registerPlugin(ScrollTrigger, Flip);
 
   var nf = new Intl.NumberFormat('pt-BR');
-  var DEFAULT_ACCENT = '#f2622d';
+  var DEFAULT_ACCENT = '#fba500';
   function brl(n) { return 'R$ ' + nf.format(Math.round(n)); }
+  var nf2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   function km(n) { return nf.format(n) + ' km'; }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -78,12 +79,13 @@
     var accent = loja.cor || DEFAULT_ACCENT;
     root.style.setProperty('--accent', accent);
     root.style.setProperty('--accent-ink', inkFor(accent));
-    var mt = $('meta[name="theme-color"]');
     $$('[data-bind]').forEach(function (el) {
       var k = el.dataset.bind;
       el.textContent = k === 'iniciais' ? iniciais(loja.nome) : (loja[k] != null ? loja[k] : '');
     });
     $$('[data-bind-href]').forEach(function (el) { el.href = 'tel:+55' + String(loja.telefone).replace(/\D/g, ''); });
+    $$('[data-bind-mail]').forEach(function (el) { el.href = 'mailto:' + loja.email; });
+    $$('.wm').forEach(function (el) { el.textContent = loja.nome; });
     document.title = loja.nome + ' - ' + loja.slogan;
     $$('[data-wa]').forEach(function (el) { setWa(el); });
     var m = loja.mapa, bb = [m.lon - .008, m.lat - .0045, m.lon + .008, m.lat + .0045].join(',');
@@ -96,6 +98,7 @@
     }).join('');
     renderOpen();
     renderStoryCar();
+    renderAboutCar();
     var sf = $('#sFine');
     if (sf) sf.textContent = 'Simulação ilustrativa com taxa de ' + String(loja.jurosMensal).replace('.', ',') + '% ao mês. Valores sujeitos à análise de crédito.';
     var sw = $('#swatches');
@@ -166,19 +169,20 @@
 
   /* ---------- cards ---------- */
   function cardHTML(c) {
-    return '<div class="art" role="presentation"></div>' +
-      '<button class="card-fav icon-btn" type="button" aria-label="Favoritar ' + esc(nome(c)) + '" aria-pressed="false"><svg class="ic"><use href="#i-heart"/></svg></button>' +
+    var selo = c.selo ? '<span class="selo"><svg class="ic"><use href="' + (c.selo === 'Blindado' ? '#i-shield' : '#i-seal') + '"/></svg>' + esc(c.selo) + '</span>' : '';
+    return '<div class="card-img"><div class="art" role="presentation"></div><span class="wm"></span>' + selo +
+      '<button class="card-fav icon-btn" type="button" aria-label="Favoritar ' + esc(nome(c)) + '" aria-pressed="false"><svg class="ic"><use href="#i-heart"/></svg></button></div>' +
       '<div class="card-body">' +
-        '<div class="card-title"><b>' + esc(nome(c)) + '</b><span>' + esc(c.versao) + '</span></div>' +
-        '<div class="card-meta"><span><svg class="ic"><use href="#i-cal"/></svg>' + c.ano + '/' + c.anoModelo + '</span><span><svg class="ic"><use href="#i-speed"/></svg>' + km(c.km) + '</span><span><svg class="ic"><use href="#i-gear"/></svg>' + c.cambio + '</span></div>' +
-        '<div class="card-foot"><div class="price"><span class="p-val">' + brl(c.preco) + '</span><span class="price-sub p-sub"></span></div><span class="card-go"><svg class="ic"><use href="#i-arrow"/></svg></span></div>' +
+        '<div class="c-brand">' + esc(c.marca) + '</div><div class="c-model">' + esc(c.modelo) + '</div><div class="c-ver">' + esc(c.versao) + '</div>' +
+        '<div class="c-meta"><span>' + km(c.km) + '</span><span>' + c.ano + '/' + c.anoModelo + '</span></div>' +
+        '<div class="c-price"><small>R$</small><span class="p-val">' + nf2.format(c.preco) + '</span></div><div class="c-sub p-sub"></div>' +
       '</div>' +
       '<button class="card-hit" type="button" aria-label="Ver detalhes do ' + esc(nome(c) + ' ' + c.versao) + '"></button>';
   }
   function updateCardPrice(c) {
     var el = cardMap[c.id]; if (!el) return;
-    $('.p-val', el).textContent = brl(c.preco);
-    $('.p-sub', el).textContent = 'a partir de ' + brl(pmt(c.preco, .3, 48)) + '/mês';
+    $('.p-val', el).textContent = nf2.format(c.preco);
+    $('.p-sub', el).textContent = 'ou ' + brl(pmt(c.preco, .3, 48)) + '/mês em 48x';
   }
 
   function buildCards() {
@@ -189,6 +193,7 @@
       var el = document.createElement('article');
       el.className = 'card'; el.dataset.id = c.id;
       el.innerHTML = cardHTML(c);
+      $('.wm', el).textContent = loja.nome;
       CarArt.mount($('.art', el), c);
       cardMap[c.id] = el;
       updateCardPrice(c);
@@ -232,10 +237,12 @@
     function uniq(k) { var o = {}; all.forEach(function (c) { o[c[k]] = 1; }); return Object.keys(o).sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); }); }
     function fill(sel, vals) {
       var cur = sel.value;
-      sel.innerHTML = '<option value="">' + (sel.id === 'fMarca' ? 'Todas' : 'Todos') + '</option>' + vals.map(function (v) { return '<option>' + esc(v) + '</option>'; }).join('');
+      var ph = { fMarca: 'Marca', fCarroceria: 'Carroceria' };
+      sel.innerHTML = '<option value="">' + (ph[sel.id] || 'Todos') + '</option>' + vals.map(function (v) { return '<option>' + esc(v) + '</option>'; }).join('');
       sel.value = vals.indexOf(cur) > -1 ? cur : '';
     }
     fill($('#fMarca'), uniq('marca'));
+    fill($('#fCarroceria'), uniq('carroceria'));
     fill($('#fComb'), uniq('combustivel'));
     fill($('#fCambio'), uniq('cambio'));
 
@@ -245,13 +252,6 @@
     fp.min = min; fp.max = max;
     if (!isFinite(F.preco) || F.preco > max) { fp.value = max; F.preco = Infinity; }
     updatePrecoOut();
-
-    var counts = {};
-    avail().forEach(function (c) { counts[c.carroceria] = (counts[c.carroceria] || 0) + 1; });
-    var types = ['Hatch', 'Sedã', 'SUV', 'Picape'].filter(function (t) { return counts[t]; });
-    var box = $('#fCarroceria');
-    box.innerHTML = '<button class="chip" type="button" data-v="" aria-pressed="' + (F.carroceria === '') + '">Todos <small>' + avail().length + '</small></button>' +
-      types.map(function (t) { return '<button class="chip" type="button" data-v="' + t + '" aria-pressed="' + (F.carroceria === t) + '">' + t + ' <small>' + counts[t] + '</small></button>'; }).join('');
 
     var bm = {};
     avail().forEach(function (c) { bm[c.marca] = (bm[c.marca] || 0) + 1; });
@@ -311,14 +311,14 @@
     grid.hidden = list.length === 0;
     var total = avail().length;
     $('#resultCount').innerHTML = '<b>' + list.length + '</b> ' + (list.length === 1 ? 'carro encontrado' : 'carros encontrados') + (list.length !== total ? ' de ' + total : '');
-    $$('.chip', $('#fCarroceria')).forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === F.carroceria)); });
+    $('#fCarroceria').value = F.carroceria;
     $$('.brand-btn').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.b === F.marca)); });
     $('#fMarca').value = F.marca;
   }
 
   function resetFilters() {
     F = { q: '', carroceria: '', marca: '', comb: '', cambio: '', preco: Infinity, ordem: 'destaque', fav: false };
-    $('#fBusca').value = ''; $('#fComb').value = ''; $('#fCambio').value = ''; $('#fOrdem').value = 'destaque';
+    $('#fBusca').value = ''; $('#fMarca').value = ''; $('#fCarroceria').value = ''; $('#fComb').value = ''; $('#fCambio').value = ''; $('#fOrdem').value = 'destaque';
     $('#fPreco').value = $('#fPreco').max; updatePrecoOut();
     applyFilters(true); syncFavs();
   }
@@ -335,7 +335,13 @@
       F.preco = +e.target.value >= +e.target.max ? Infinity : +e.target.value;
     });
     $('#fPreco').addEventListener('change', function () { applyFilters(true); });
-    $('#fCarroceria').addEventListener('click', function (e) { var b = e.target.closest('.chip'); if (!b) return; F.carroceria = b.dataset.v; applyFilters(true); });
+    $('#fCarroceria').addEventListener('change', function (e) { F.carroceria = e.target.value; applyFilters(true); });
+    $('#advBtn').addEventListener('click', function () {
+      var box = $('#advBox'), open = box.hidden;
+      box.hidden = !open;
+      this.setAttribute('aria-expanded', String(open));
+      if (open && MOTION) gsap.from(box, { opacity: 0, y: -10, duration: .5, ease: 'power3.out' });
+    });
     $('#brandsRow').addEventListener('click', function (e) {
       var b = e.target.closest('.brand-btn'); if (!b) return;
       F.marca = F.marca === b.dataset.b ? '' : b.dataset.b;
@@ -439,7 +445,7 @@
   });
 
   /* ---------- hero ---------- */
-  var hero = { list: [], i: 0, tween: null, layer: null, mark: null };
+  var hero = { list: [], i: 0, tween: null, layer: null };
   function heroList() {
     var f = avail().filter(function (c) { return c.destaque; });
     if (f.length < 3) f = f.concat(avail().filter(function (c) { return !c.destaque; }).sort(function (a, b) { return b.preco - a.preco; }).slice(0, 3 - f.length));
@@ -452,69 +458,74 @@
     return d;
   }
   function setHeroText(c) {
-    $('#hcName').textContent = nome(c) + ' ' + c.ano;
-    $('#hcMeta').textContent = brl(c.preco) + ' · ' + km(c.km);
+    $('#htA').textContent = c.marca;
+    $('#htB').textContent = c.modelo;
+    $('#htC').textContent = c.ano;
+    $('#htPrice').textContent = brl(c.preco);
   }
-  function buildHero(first) {
+  function buildHero() {
     hero.list = heroList();
     var stage = $('#heroStage');
-    if (!hero.layer || !stage.contains(hero.layer)) {
-      stage.innerHTML = '<div class="mark"></div><div class="stage-layer" style="position:absolute;inset:0"></div>';
-      hero.mark = $('.mark', stage); hero.layer = $('.stage-layer', stage);
-    }
-    $('#heroTabs').innerHTML = hero.list.map(function (c, k) { return '<button class="hero-tab" role="tab" type="button" aria-label="' + esc(nome(c)) + '" aria-selected="false" data-k="' + k + '"><i></i></button>'; }).join('');
+    if (!hero.layer || !stage.contains(hero.layer)) { stage.innerHTML = '<div class="stage-layer"></div>'; hero.layer = $('.stage-layer', stage); }
+    $('#heroTabs').innerHTML = hero.list.map(function (c, k) { return '<button class="hero-dot" role="tab" type="button" aria-label="' + esc(nome(c)) + '" aria-selected="false" data-k="' + k + '"></button>'; }).join('');
     if (hero.tween) hero.tween.kill();
     hero.i = -1;
-    showHero(0, first);
+    showHero(0, true);
   }
   function showHero(k, instant) {
     if (!hero.list.length) return;
     var c = hero.list[k], old = $('.stage-car', hero.layer), dir = k >= hero.i ? 1 : -1;
-    $$('.hero-tab').forEach(function (t, n) { t.setAttribute('aria-selected', String(n === k)); var bar = $('i', t); if (HAS_GSAP) gsap.set(bar, { clearProps: 'transform' }); });
+    $$('.hero-dot').forEach(function (t, n) { t.setAttribute('aria-selected', String(n === k)); });
     hero.i = k;
     setHeroText(c);
-    var mk = window.BRAND_PATHS[c.marca];
-    hero.mark.innerHTML = mk ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + mk + '"/></svg>' : '';
     var el = heroCar(c);
     hero.layer.appendChild(el);
     if (MOTION && !instant) {
       el.classList.add('rolling');
-      gsap.fromTo(el, { xPercent: 16 * dir, opacity: 0 }, { xPercent: 0, opacity: 1, duration: .9, ease: 'power4.out' });
-      if (old) gsap.to(old, { xPercent: -16 * dir, opacity: 0, duration: .6, ease: 'power3.in', onComplete: function () { old.remove(); } });
-      gsap.fromTo(hero.mark, { opacity: 0 }, { opacity: 1, duration: .8 });
+      gsap.fromTo(el, { xPercent: 14 * dir, opacity: 0 }, { xPercent: 0, opacity: 1, duration: .95, ease: 'power4.out' });
+      if (old) gsap.to(old, { xPercent: -14 * dir, opacity: 0, duration: .6, ease: 'power3.in', onComplete: function () { old.remove(); } });
+      gsap.fromTo(['#htA', '#htB', '#htC', '.ht-foot'], { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: .8, ease: 'power3.out', stagger: .07, overwrite: true });
     } else if (old) old.remove();
-    if (MOTION) {
-      var bar = $('.hero-tab[aria-selected="true"] i');
-      hero.tween = gsap.fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: 5.5, ease: 'none', onComplete: function () { showHero((hero.i + 1) % hero.list.length); } });
-    }
+    if (MOTION) hero.tween = gsap.delayedCall(5.8, function () { showHero((hero.i + 1) % hero.list.length); });
   }
   function bindHero() {
     $('#heroTabs').addEventListener('click', function (e) {
-      var t = e.target.closest('.hero-tab'); if (!t) return;
+      var t = e.target.closest('.hero-dot'); if (!t) return;
       if (hero.tween) hero.tween.kill();
       showHero(+t.dataset.k);
     });
     $('#hcOpen').addEventListener('click', function () { openModal(hero.list[hero.i].id); });
-    var wrap = $('.hero-stage-wrap');
-    wrap.addEventListener('pointerenter', function () { if (hero.tween) hero.tween.pause(); });
-    wrap.addEventListener('pointerleave', function () { if (hero.tween) hero.tween.resume(); });
+    var h = $('#hero');
+    h.addEventListener('pointerenter', function () { if (hero.tween) hero.tween.pause(); });
+    h.addEventListener('pointerleave', function () { if (hero.tween) hero.tween.resume(); });
     document.addEventListener('visibilitychange', function () { if (!hero.tween) return; document.hidden ? hero.tween.pause() : hero.tween.resume(); });
     if (MOTION && window.matchMedia('(pointer: fine)').matches) {
-      var stage = $('#heroStage'), lx, ly, mx, my;
-      stage.addEventListener('pointermove', function (e) {
+      var lx, ly, sx, sy, slash = $('.hero-slash');
+      h.addEventListener('pointermove', function (e) {
         if (!hero.layer) return;
-        if (!lx) { lx = gsap.quickTo(hero.layer, 'x', { duration: .8, ease: 'power3' }); ly = gsap.quickTo(hero.layer, 'y', { duration: .8, ease: 'power3' }); mx = gsap.quickTo(hero.mark, 'x', { duration: 1.2, ease: 'power3' }); my = gsap.quickTo(hero.mark, 'y', { duration: 1.2, ease: 'power3' }); }
-        var r = stage.getBoundingClientRect(), px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5;
-        lx(px * 22); ly(py * 12); mx(px * -34); my(py * -18);
+        if (!lx) { lx = gsap.quickTo(hero.layer, 'x', { duration: .9, ease: 'power3' }); ly = gsap.quickTo(hero.layer, 'y', { duration: .9, ease: 'power3' }); sx = gsap.quickTo(slash, 'x', { duration: 1.3, ease: 'power3' }); sy = gsap.quickTo(slash, 'y', { duration: 1.3, ease: 'power3' }); }
+        var r = h.getBoundingClientRect(), px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5;
+        lx(px * -26); ly(py * -12); sx(px * 34); sy(py * 18);
       });
-      stage.addEventListener('pointerleave', function () { if (lx) { lx(0); ly(0); mx(0); my(0); } });
     }
+  }
+  function introHero() {
+    if (!MOTION) return;
+    gsap.fromTo('#heroStage', { opacity: 0, x: 90 }, { opacity: 1, x: 0, duration: 1.4, ease: 'power4.out' });
+    gsap.fromTo('.hero-slash i', { opacity: 0, y: 60 }, { opacity: function (i) { return i ? .6 : .8; }, y: 0, duration: 1.2, ease: 'power4.out', stagger: .15 });
+    gsap.to(['.ht-a', '.ht-b', '.ht-c', '.ht-foot'], { opacity: 1, y: 0, duration: 1, ease: 'power4.out', stagger: .12, delay: .15 });
   }
 
   /* ---------- historia pinada ---------- */
   function renderStoryCar() {
     var accent = loja.cor || DEFAULT_ACCENT;
     $('#storyCar').innerHTML = CarArt.svg({ marca: 'SUV', modelo: 'ilustração', carroceria: 'SUV', cor: { nome: 'cor da marca', hex: accent } });
+  }
+  function renderAboutCar() {
+    var box = $('#aboutArt'); if (!box) return;
+    var holder = $('.about-car', box);
+    if (!holder) { holder = document.createElement('div'); holder.className = 'about-car'; holder.style.cssText = 'position:relative;width:86%;margin-right:auto'; box.insertBefore(holder, box.firstChild); }
+    holder.innerHTML = CarArt.svg({ marca: 'Carro', modelo: 'ilustração', carroceria: 'SUV', cor: { nome: 'cor da marca', hex: loja.cor || DEFAULT_ACCENT } });
   }
   var storyMM = null;
   function initStory() {
@@ -592,22 +603,28 @@
 
   function bindForms() {
     var sf = $('#sellForm'), yr = new Date().getFullYear();
-    $$('input', sf).forEach(function (i) { i.addEventListener('input', function () { if (i.closest('.invalid')) fieldErr(i, ''); }); });
+    $$('input, textarea', sf).forEach(function (i) { i.addEventListener('input', function () { if (i.closest('.invalid')) fieldErr(i, ''); }); });
+    sf.elements.privacidade.addEventListener('change', function () { $('#consentErr').hidden = this.checked; });
     sf.addEventListener('submit', function (e) {
       e.preventDefault();
       var ok = validate(sf, {
+        nome: req('seu nome'),
+        telefone: function (v) { return v.replace(/\D/g, '').length >= 10 ? '' : 'Informe o telefone com DDD.'; },
+        email: function (v) { return !v || /^\S+@\S+\.\S+$/.test(v) ? '' : 'E-mail inválido.'; },
         marca: req('a marca'), modelo: req('o modelo'),
         ano: function (v) { return /^\d{4}$/.test(v) && +v >= 1990 && +v <= yr + 1 ? '' : 'Ano com 4 dígitos.'; },
-        km: function (v) { return /^\d[\d.]*$/.test(v) ? '' : 'Só números.'; },
-        nome: req('seu nome')
+        km: function (v) { return /^\d[\d.]*$/.test(v) ? '' : 'Só números.'; }
       });
+      var cons = sf.elements.privacidade.checked;
+      $('#consentErr').hidden = cons;
+      if (!cons) { ok = false; if (!$('.invalid', sf)) sf.elements.privacidade.focus(); }
       if (!ok) return;
-      var f = sf.elements;
-      setWa($('#sellWa'), 'Olá! Quero avaliar meu carro: ' + f.marca.value.trim() + ' ' + f.modelo.value.trim() + ', ano ' + f.ano.value.trim() + ', ' + f.km.value.trim() + ' km. Meu nome é ' + f.nome.value.trim() + '.');
+      var f = sf.elements, v = f.versao.value.trim(), m = f.mensagem.value.trim();
+      setWa($('#sellWa'), 'Olá! Quero avaliar meu carro: ' + f.marca.value.trim() + ' ' + f.modelo.value.trim() + (v ? ' ' + v : '') + ', ano ' + f.ano.value.trim() + ', ' + f.km.value.trim() + ' km.' + (m ? ' ' + m : '') + ' Meu nome é ' + f.nome.value.trim() + ', telefone ' + f.telefone.value.trim() + '.');
       sf.hidden = true; $('#sellOk').hidden = false;
       if (MOTION) gsap.from($('#sellOk'), { opacity: 0, y: 16, duration: .6, ease: 'power3.out' });
     });
-    $('#sellAgain').addEventListener('click', function () { sf.reset(); sf.hidden = false; $('#sellOk').hidden = true; sf.elements.marca.focus(); });
+    $('#sellAgain').addEventListener('click', function () { sf.reset(); sf.hidden = false; $('#sellOk').hidden = true; sf.elements.nome.focus(); });
 
     var tf = $('#tdForm');
     tf.elements.nome.addEventListener('input', function () { fieldErr(tf.elements.nome, ''); });
@@ -662,15 +679,16 @@
 
   /* ---------- menu mobile ---------- */
   function toggleMenu(force) {
-    var nav = $('#nav'), open = typeof force === 'boolean' ? force : !nav.classList.contains('open');
+    var nav = $('#nav'), m = $('#mnav'), open = typeof force === 'boolean' ? force : m.hidden;
+    m.hidden = !open;
     nav.classList.toggle('open', open);
     $('#menuBtn').setAttribute('aria-expanded', String(open));
   }
   $('#menuBtn').addEventListener('click', function () { toggleMenu(); });
-  $$('.nav-links a').forEach(function (a) { a.addEventListener('click', function () { toggleMenu(false); }); });
+  $$('#mnav a').forEach(function (a) { a.addEventListener('click', function () { toggleMenu(false); }); });
 
   /* ---------- painel do lojista ---------- */
-  var SWATCHES = [['#f2622d', 'Laranja'], ['#3b82f6', 'Azul'], ['#1fa971', 'Verde'], ['#e5484d', 'Vermelho'], ['#e3a21a', 'Âmbar'], ['#d9dce0', 'Prata']];
+  var SWATCHES = [['#fba500', 'Âmbar'], ['#f2622d', 'Laranja'], ['#3b82f6', 'Azul'], ['#1fa971', 'Verde'], ['#e5484d', 'Vermelho'], ['#d9dce0', 'Prata']];
   function openPanel() {
     var p = $('#panel');
     p.hidden = false;
@@ -731,7 +749,7 @@
     populateFilters();
     applyFilters(false);
     buildSim(); buildTestDrive(); syncFavs();
-    if (!priceOnly || !feat || byId(feat.id).vendido) { if (hero.tween) hero.tween.kill(); buildHero(true); if (MOTION) hero.tween && hero.tween.restart(); }
+    if (!priceOnly || !feat || byId(feat.id).vendido) { if (hero.tween) hero.tween.kill(); buildHero(); }
     else setHeroText(feat);
     if (HAS_GSAP) ScrollTrigger.refresh();
   }
@@ -775,15 +793,8 @@
       }
     });
 
-    /* intro do hero */
-    var tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
-    tl.to('.display .line > span', { y: 0, yPercent: 0, duration: 1.1, stagger: .12 }, .1)
-      .to('.reveal-hero', { opacity: 1, y: 0, duration: .9, stagger: .1 }, .45)
-      .from('.hero-stage', { opacity: 0, y: 40, scale: .97, duration: 1.2 }, .25)
-      .from('.hero-caption, .hero-tabs', { opacity: 0, y: 14, duration: .8, stagger: .08 }, .9);
-
     /* revelacao ao rolar */
-    var targets = ['.sec-head > *', '.filters', '.fin-copy > *', '.sim', '.sell', '.bento-cell', '.dep-head', '.quote', '.contact-info > *', '.map', '.brands .wrap > *', '.footer-in > *'];
+    var targets = ['#estoque .sec-title', '#estoque .sec-sub', '.filters', '.fin-copy > *', '.sim', '.about-copy > *', '.about-art', '.stats > div', '.sell-form-wrap', '.dep-head', '.quote', '.contact-info > *', '.map', '.brands .wrap > *', '.footer-in > *'];
     targets.forEach(function (s) { $$(s).forEach(function (el) { el.classList.add('rv'); }); });
     ScrollTrigger.batch('.rv', {
       start: 'top 90%', once: true,
@@ -801,15 +812,15 @@
 
     /* link ativo no menu */
     ['estoque', 'financiamento', 'vender', 'loja', 'contato'].forEach(function (id) {
-      var link = $('.nav-links a[href="#' + id + '"]');
+      var link = $('.nav-side a[href="#' + id + '"]');
       ScrollTrigger.create({ trigger: '#' + id, start: 'top 45%', end: 'bottom 45%', onToggle: function (s) { if (link) link.classList.toggle('on', s.isActive); } });
     });
 
     /* botoes magneticos (so em ponteiro fino) */
     if (window.matchMedia('(pointer: fine)').matches) {
-      $$('.hero-cta .btn, .nav-cta').forEach(function (b) {
+      $$('.ht-foot .btn, .sell-actions .btn').forEach(function (b) {
         var qx = gsap.quickTo(b, 'x', { duration: .5, ease: 'power3' }), qy = gsap.quickTo(b, 'y', { duration: .5, ease: 'power3' });
-        b.addEventListener('pointermove', function (e) { var r = b.getBoundingClientRect(); qx((e.clientX - r.left - r.width / 2) * .22); qy((e.clientY - r.top - r.height / 2) * .3); });
+        b.addEventListener('pointermove', function (e) { var r = b.getBoundingClientRect(); qx((e.clientX - r.left - r.width / 2) * .18); qy((e.clientY - r.top - r.height / 2) * .25); });
         b.addEventListener('pointerleave', function () { qx(0); qy(0); });
       });
     }
@@ -839,11 +850,8 @@
       populateFilters();
       applyFilters(false);
       buildSim(); buildTestDrive(); syncFavs();
-      bindHero(); buildHero(true);
-      var showcase = avail().filter(function (c) { return c.marca === 'BMW'; })[0] || avail()[0];
-      if (showcase) CarArt.mount($('#bentoArt'), showcase);
+      bindHero(); buildHero(); introHero();
       if (HAS_GSAP) { ScrollTrigger.refresh(); }
-      if (MOTION) hero.tween && hero.tween.restart();
       var h = location.hash.slice(1);
       if (h && byId(h)) openModal(h);
     });

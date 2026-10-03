@@ -37,7 +37,7 @@ window.ESTOQUE = [
     carroceria: "SUV", cor: { nome: "Cinza Platinum", hex: "#6f7378" }, motor: "1.4 turbo", potencia: "150 cv", portas: 4,
     opcionais: ["Teto solar panorâmico", "Central multimídia 10\"", "Painel digital", "Sensor de estacionamento", "Faróis full LED", "Piloto automático adaptativo"],
     descricao: "SUV compacto na versão topo de linha, com único dono e revisões feitas na concessionária. O motor turbo responde bem na cidade e na estrada, e o pacote de tecnologia completa o conjunto.",
-    destaque: true, vendido: false, fotos: []
+    selo: "Único dono", destaque: true, vendido: false, fotos: []
   },
   {
     id: "corolla-xei-21", marca: "Toyota", modelo: "Corolla", versao: "XEi 2.0 Dynamic Force",
@@ -69,7 +69,7 @@ window.ESTOQUE = [
     carroceria: "Hatch", cor: { nome: "Vermelho Chili", hex: "#b3202a" }, motor: "1.0 turbo", potencia: "116 cv", portas: 4,
     opcionais: ["Wi-Fi nativo", "Carregador por indução", "Sensor de chuva", "Câmera de ré", "Rodas aro 16\""],
     descricao: "Praticamente zero, com garantia de fábrica ainda válida. Ideal para o dia a dia: econômico, ágil e com tecnologia de sobra para um hatch.",
-    destaque: false, vendido: false, fotos: []
+    selo: "Garantia de fábrica", destaque: false, vendido: false, fotos: []
   },
   {
     id: "creta-ultimate-23", marca: "Hyundai", modelo: "Creta", versao: "Ultimate 1.0 Turbo",
@@ -77,7 +77,7 @@ window.ESTOQUE = [
     carroceria: "SUV", cor: { nome: "Branco Polar", hex: "#f1f1ef" }, motor: "1.0 turbo", potencia: "120 cv", portas: 4,
     opcionais: ["Teto solar", "Hyundai SmartSense", "Painel digital 10,25\"", "Bancos ventilados", "Carregador sem fio"],
     descricao: "SUV equipado como poucos na faixa de preço, com assistências de segurança completas e garantia de fábrica. Único dono, nunca batido.",
-    destaque: false, vendido: false, fotos: []
+    selo: "Garantia de fábrica", destaque: false, vendido: false, fotos: []
   },
   {
     id: "toro-volcano-22", marca: "Fiat", modelo: "Toro", versao: "Volcano 2.0 Turbodiesel 4x4",
@@ -141,7 +141,7 @@ window.ESTOQUE = [
     carroceria: "Sedã", cor: { nome: "Preto Obsidiana", hex: "#101114" }, motor: "1.6 turbo", potencia: "156 cv", portas: 4,
     opcionais: ["Iluminação ambiente", "Bancos elétricos", "Pacote AMG Line", "Teto solar", "Multimídia MBUX"],
     descricao: "Sedã de luxo com cabine silenciosa e acabamento refinado. Todas as revisões na rede autorizada e laudo cautelar aprovado sem ressalvas.",
-    destaque: false, vendido: false, fotos: []
+    selo: "Blindado", destaque: false, vendido: false, fotos: []
   },
   {
     id: "x1-sdrive-21", marca: "BMW", modelo: "X1", versao: "sDrive20i X-Line",
@@ -149,7 +149,7 @@ window.ESTOQUE = [
     carroceria: "SUV", cor: { nome: "Branco Alpino", hex: "#ececea" }, motor: "2.0 turbo", potencia: "192 cv", portas: 4,
     opcionais: ["Teto solar panorâmico", "Banco elétrico com memória", "Head-up display", "Câmera de ré", "Chave por aproximação"],
     descricao: "SUV premium com dirigibilidade de esportivo e interior caprichado. Uma proprietária, revisões em dia e pneus novos.",
-    destaque: true, vendido: false, fotos: []
+    selo: "Único dono", destaque: true, vendido: false, fotos: []
   },
   {
     id: "ranger-limited-22", marca: "Ford", modelo: "Ranger", versao: "Limited 3.0 V6 Diesel 4x4",

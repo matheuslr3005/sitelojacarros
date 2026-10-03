@@ -11,11 +11,15 @@ python3 -m http.server 8000
 
 ## O que o site tem
 
-- Hero com os carros em destaque trocando sozinhos, com parallax no mouse.
-- Estoque com busca, filtros (carroceria, marca, combustível, câmbio, preço), ordenação e favoritos. Os cards se reorganizam com animação ao filtrar.
+- Hero em tela cheia com o nome do carro em destaque (marca fina, modelo pesado), carros em destaque trocando sozinhos e parallax no mouse.
+- Estoque com busca, filtros (marca, carroceria e, em "Filtro avançado", combustível, câmbio e preço), ordenação e favoritos. Os cards se reorganizam com animação ao filtrar.
 - Página de detalhes do carro (modal) com especificações, opcionais, parcela estimada, WhatsApp com mensagem já preenchida e agendamento de test-drive. Setas do teclado navegam entre os carros.
-- Seção de rolagem animada ("o que vem com todo carro"), simulador de financiamento, formulário "quanto vale o seu carro", história da loja, depoimentos, mapa, horário com "aberto agora".
-- Tema escuro e claro, responsivo e com respeito a `prefers-reduced-motion`.
+- Seção de rolagem animada ("o que vem com todo carro"), simulador de financiamento, faixa e formulário completo de venda (dados pessoais e do veículo), história da loja, depoimentos, mapa, horário com "aberto agora".
+- Botão flutuante do WhatsApp, tema claro (padrão) e escuro, responsivo e com respeito a `prefers-reduced-motion`.
+
+## Estilo visual
+
+Página clara com navegação e rodapé cinza, acento amarelo-âmbar, botões e filtros em paralelogramo inclinado, cards quadrados com fio de cor sob a imagem e a marca de duas barras inclinadas nos títulos pequenos. Tipografia: Raleway (contraste entre peso 300 e 800) e Michroma para o nome da loja. A cor do acento é trocada em um lugar só (Painel do lojista, aba Personalizar, ou `--accent` em `css/styles.css`).
 
 ## Painel do lojista (o botão no canto inferior esquerdo)
 
@@ -41,7 +45,7 @@ Todo o site lê os dados por um único ponto, `js/api.js`. Hoje ele lê `js/data
 2. Reescreva `API.listar()` em `js/api.js` para buscar essa fonte e devolver uma lista de veículos no mesmo formato de `js/data/estoque.js`. Nada mais no site precisa mudar.
 3. Se a fonte exigir chave de acesso, o conector deve rodar num servidor pequeno (não no navegador) para não expor a chave.
 
-Formato de cada veículo: `id`, `marca`, `modelo`, `versao`, `ano`, `anoModelo`, `km`, `preco`, `combustivel`, `cambio`, `carroceria` (Hatch, Sedã, SUV ou Picape), `cor {nome, hex}`, `motor`, `potencia`, `portas`, `opcionais[]`, `descricao`, `destaque`, `vendido`, `fotos[]`.
+Formato de cada veículo: `id`, `marca`, `modelo`, `versao`, `ano`, `anoModelo`, `km`, `preco`, `combustivel`, `cambio`, `carroceria` (Hatch, Sedã, SUV ou Picape), `cor {nome, hex}`, `motor`, `potencia`, `portas`, `opcionais[]`, `descricao`, `destaque`, `vendido`, `fotos[]` e, opcional, `selo` (texto curto no canto da foto, ex.: "Blindado", "Único dono").
 
 ## Fotos
 
@@ -65,5 +69,5 @@ js/car-art.js         ilustração de estúdio e carregamento de fotos
 js/icons.js           ícones (Phosphor, MIT)
 js/brands.js          logos de marcas (Simple Icons, CC0)
 js/vendor/            GSAP, ScrollTrigger e Flip
-assets/fonts/         Geist e Geist Mono (OFL)
+assets/fonts/         Raleway, Michroma e Geist Mono (OFL)
 ```
