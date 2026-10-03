@@ -20,6 +20,7 @@
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function fmtH(h) { return h.replace(':', 'h'); }
   function nome(c) { return c.marca + ' ' + c.modelo; }
+  function setHash(h) { try { history.replaceState(null, '', h); } catch (e) { /* frame restrito */ } }
   function save(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignorado */ } }
   function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 
@@ -88,7 +89,7 @@
     var m = loja.mapa, bb = [m.lon - .008, m.lat - .0045, m.lon + .008, m.lat + .0045].join(',');
     var frame = $('#mapFrame');
     var src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + bb + '&layer=mapnik&marker=' + m.lat + ',' + m.lon;
-    if (frame.getAttribute('src') !== src) frame.setAttribute('src', src);
+    if (frame && frame.getAttribute('src') !== src) frame.setAttribute('src', src);
     $('#mapLink').href = 'https://www.openstreetmap.org/?mlat=' + m.lat + '&mlon=' + m.lon + '#map=17/' + m.lat + '/' + m.lon;
     $('#horarios').innerHTML = loja.horarios.map(function (h) {
       return '<div class="hours-line"><span>' + h.rotulo + '</span><span>' + h.texto + '</span></div>';
@@ -389,12 +390,12 @@
       gsap.fromTo($$('.modal-body > *', m), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: .55, ease: 'power3.out', stagger: .04, delay: .12, clearProps: 'opacity,transform' });
     }
     $('.modal-close', m).focus({ preventScroll: true });
-    history.replaceState(null, '', '#' + id);
+    setHash('#' + id);
   }
   function closeModal() {
     if (modalId == null) return;
     var m = $('#modal');
-    function done() { m.hidden = true; root.style.overflow = ''; modalId = null; if (lastFocus) lastFocus.focus({ preventScroll: true }); history.replaceState(null, '', location.pathname + location.search); }
+    function done() { m.hidden = true; root.style.overflow = ''; modalId = null; if (lastFocus) lastFocus.focus({ preventScroll: true }); setHash(location.pathname + location.search); }
     if (MOTION) {
       gsap.to($('.modal-card', m), { opacity: 0, y: 24, scale: .98, duration: .28, ease: 'power2.in' });
       gsap.to($('.modal-scrim', m), { opacity: 0, duration: .3, onComplete: done });
@@ -406,7 +407,7 @@
     var n = visible[(i + dir + visible.length) % visible.length];
     fillModal(n);
     if (MOTION) gsap.fromTo($('.modal-media .art', $('#modal')), { opacity: 0, x: dir * 30 }, { opacity: 1, x: 0, duration: .5, ease: 'power3.out' });
-    history.replaceState(null, '', '#' + n.id);
+    setHash('#' + n.id);
   }
   $('#modal').addEventListener('click', function (e) { if (e.target.closest('[data-close]')) closeModal(); });
   $('#mPrev').addEventListener('click', function () { stepModal(-1); });
