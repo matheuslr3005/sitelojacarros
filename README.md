@@ -15,13 +15,21 @@ Cada item do menu abre a sua própria página (não é uma rolagem contínua):
 
 | Página | O que tem |
 | --- | --- |
-| Início | Destaques em tela cheia, marcas, carros em destaque, "o que vem com todo carro" e chamada para vender |
+| Início | Hero em tela cheia (modelo, marca e ano, sem preço), faixa de diferenciais, marcas, carros em destaque, "o que vem com todo carro" e chamada para vender |
 | Estoque | Busca, filtros (marca, carroceria e, em "Filtro avançado", combustível, câmbio e preço), ordenação e favoritos |
 | Veículo | Abre ao clicar num carro: galeria de fotos, preço, parcela, ficha técnica, opcionais, descrição, WhatsApp e outros carros |
 | Financiamento | Texto sobre taxas, prazos, entrada e bancos, mais o simulador de parcela |
 | Venda | Formulário completo (dados pessoais e do veículo) que monta a mensagem para o WhatsApp |
 | Sobre nós | História da loja, números e depoimentos |
 | Contato | Endereço, horários, "aberto agora", WhatsApp e mapa |
+
+## O hero se monta sozinho (sem manutenção)
+
+O hero da página inicial não tem nada digitado à mão: ele é montado a partir do estoque. Mostra até 6 modelos diferentes, só os que têm foto, com **marca, modelo e ano e sem preço** (por isso não envelhece quando o preço muda). Quem estiver marcado como `destaque` no cadastro vem primeiro; sem isso, entram os mais novos. Carro vendido sai sozinho.
+
+O site também busca o estoque de novo a cada 5 minutos e sempre que a pessoa volta para a aba. Se algo mudou na fonte de dados (preço, vendido, carro novo), estoque, hero e destaques se reorganizam sem recarregar a página. Ligando `js/api.js` ao sistema da loja, ninguém precisa atualizar o site à mão.
+
+A faixa logo abaixo do hero (laudo cautelar, garantia, financiamento, troca) é texto fixo em `index.html`.
 
 ## Fotos
 

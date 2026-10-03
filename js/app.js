@@ -365,10 +365,15 @@
   }
 
   /* ---------- pagina inicial ---------- */
+  /* Modelos do hero: montados sozinhos a partir do estoque (um por modelo, so os que tem foto).
+     Quem manda "destaque" no cadastro vem primeiro; sem isso, entram os mais novos. Nao ha valor aqui de proposito. */
   function heroList() {
-    var f = avail().filter(function (c) { return c.destaque; });
-    if (f.length < 3) f = f.concat(avail().filter(function (c) { return !c.destaque; }).sort(function (a, b) { return b.preco - a.preco; }).slice(0, 3 - f.length));
-    return f.slice(0, 5);
+    var seen = {}, out = [];
+    var pool = avail().filter(function (c) { return c.fotos && c.fotos.length; }).sort(function (a, b) {
+      return (b.destaque ? 1 : 0) - (a.destaque ? 1 : 0) || b.anoModelo - a.anoModelo || a.km - b.km;
+    });
+    pool.forEach(function (c) { var k = c.marca + '|' + c.modelo; if (!seen[k] && out.length < 6) { seen[k] = 1; out.push(c); } });
+    return out;
   }
   function renderHome() {
     var f = avail().filter(function (c) { return c.destaque; });
@@ -396,13 +401,19 @@
     $('#htA').textContent = c.marca;
     $('#htB').textContent = c.modelo;
     $('#htC').textContent = c.ano;
-    $('#htPrice').textContent = brl(c.preco);
   }
   function buildHero() {
     hero.list = heroList();
     var stage = $('#heroStage');
     if (!hero.layer || !stage.contains(hero.layer)) { stage.innerHTML = '<div class="stage-layer"></div>'; hero.layer = $('.stage-layer', stage); }
-    $('#heroTabs').innerHTML = hero.list.map(function (c, k) { return '<button class="hero-dot" role="tab" type="button" aria-label="' + esc(nome(c)) + '" aria-selected="false" data-k="' + k + '"></button>'; }).join('');
+    var strip = $('#heroTabs');
+    strip.innerHTML = hero.list.map(function (c, k) {
+      return '<button class="hs-item" role="tab" type="button" aria-selected="false" data-k="' + k + '" aria-label="' + esc(nome(c) + ' ' + c.ano) + '">' +
+        '<span class="hs-img"></span><span class="hs-txt"><b>' + esc(c.modelo) + '</b><small>' + esc(c.marca + ' ' + c.ano) + '</small></span><span class="hs-bar"><i></i></span></button>';
+    }).join('');
+    $$('.hs-img', strip).forEach(function (box, k) {
+      Photos.loadFirst(hero.list[k].fotos, 300, '', true, function (img) { img.className = ''; box.appendChild(img); });
+    });
     if (hero.tween) hero.tween.kill();
     hero.i = -1;
     showHero(0, true);
@@ -410,7 +421,7 @@
   function showHero(k, instant) {
     if (!hero.list.length) return;
     var c = hero.list[k], old = $('.stage-car', hero.layer);
-    $$('.hero-dot').forEach(function (t, n) { t.setAttribute('aria-selected', String(n === k)); });
+    $$('.hs-item').forEach(function (t, n) { t.setAttribute('aria-selected', String(n === k)); if (HAS_GSAP) gsap.set($('i', t), { clearProps: 'transform' }); });
     hero.i = k;
     setHeroText(c);
     var el = heroSlide(c);
@@ -419,16 +430,22 @@
       if (old) gsap.to(old, { opacity: 0, duration: 1, ease: 'power2.inOut', onComplete: function () { old.remove(); } });
       gsap.fromTo(['#htA', '#htB', '#htC', '.ht-foot'], { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: .8, ease: 'power3.out', stagger: .07, overwrite: true });
     } else if (old) old.remove();
+    var sel = $('.hs-item[aria-selected="true"]');
+    if (sel) sel.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     if (onPage('inicio')) startHeroTimer();
   }
+  /* o tempo de cada slide aparece como barra de progresso embaixo do modelo ativo */
   function startHeroTimer() {
     if (!MOTION || !hero.list.length) return;
     if (hero.tween) hero.tween.kill();
-    hero.tween = gsap.delayedCall(6.5, function () { showHero((hero.i + 1) % hero.list.length); });
+    var bar = $('.hs-item[aria-selected="true"] i');
+    hero.tween = bar
+      ? gsap.fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: 6.5, ease: 'none', onComplete: function () { showHero((hero.i + 1) % hero.list.length); } })
+      : gsap.delayedCall(6.5, function () { showHero((hero.i + 1) % hero.list.length); });
   }
   function bindHero() {
     $('#heroTabs').addEventListener('click', function (e) {
-      var t = e.target.closest('.hero-dot'); if (!t) return;
+      var t = e.target.closest('.hs-item'); if (!t) return;
       if (hero.tween) hero.tween.kill();
       showHero(+t.dataset.k);
     });
@@ -758,7 +775,7 @@
       if (r.name === 'financiamento') { buildSim(); }
       if (r.name === 'inicio' && !hero.intro) introHero();
     }
-    if (r.name === 'inicio') { if (hero.tween && hero.tween.isActive && !document.hidden) hero.tween.resume(); else if (cars.length && !hero.tween) startHeroTimer(); }
+    if (r.name === 'inicio') { if (hero.tween && !document.hidden) hero.tween.resume(); else if (cars.length && !hero.tween) startHeroTimer(); }
     else if (hero.tween) hero.tween.pause();
 
     if (!opts.silent && changed) {
@@ -801,6 +818,21 @@
     $$('.count').forEach(function (el) { cio.observe(el); });
   }
 
+  /* ---------- estoque vindo da fonte de dados ---------- */
+  var stockSig = '';
+  function sigOf(list) { return JSON.stringify(list.map(function (c) { return [c.id, c.preco, c.vendido, c.km, c.destaque, (c.fotos || []).length]; })); }
+  function applyStock(list) {
+    cars = list; stockSig = sigOf(list);
+    buildCards(); populateFilters(); applyFilters(false); buildSim(); syncFavs(); renderHome(); buildHero();
+    if (current.name === 'veiculo') {
+      var c = byId(current.id);
+      if (!c || c.vendido) go('estoque'); else renderVehicle(current.id);
+    }
+  }
+  function pollStock() {
+    API.listar().then(function (l) { if (sigOf(l) !== stockSig) applyStock(l); });
+  }
+
   /* ---------- inicializacao ---------- */
   function applyUrlParams() {
     var p = new URLSearchParams(location.search), patch = {};
@@ -821,18 +853,16 @@
     route({ silent: true });
 
     API.listar().then(function (list) {
-      cars = list;
-      buildCards();
-      populateFilters();
-      applyFilters(false);
-      buildSim(); syncFavs();
-      renderHome();
-      buildHero();
+      applyStock(list);
       Photos.mount($('#aboutImg'), { fotos: window.MIDIA.sobre, marca: 'Carro', modelo: 'do estoque' }, { w: 1200 });
       route({ silent: true });
       if (onPage('inicio') && !hero.intro) introHero();
       if (onPage('inicio') && hero.tween) hero.tween.resume();
     });
+    /* O site se atualiza sozinho: de tempos em tempos (e ao voltar para a aba) busca o estoque de novo.
+       Se algo mudou na fonte de dados (preco, vendido, carro novo), tudo se reorganiza, hero inclusive. */
+    setInterval(pollStock, 5 * 60 * 1000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) pollStock(); });
     setInterval(renderOpen, 60000);
   }
   boot();

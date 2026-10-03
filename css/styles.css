@@ -148,15 +148,32 @@ html[data-theme="light"] .ic-moon { display: none; }
     linear-gradient(to top, rgba(0, 0, 0, .45), transparent 32%); }
 .hero-text { position: absolute; left: clamp(16px, 5vw, 84px); top: calc(var(--nav-h) + 8vh); max-width: min(92vw, 940px); z-index: 2; text-shadow: 0 2px 28px rgba(0, 0, 0, .45); }
 .ht-a { font-weight: 300; text-transform: uppercase; font-size: clamp(1.7rem, 4.3vw, 4.1rem); line-height: 1.05; letter-spacing: .02em; }
-.ht-b { font-weight: 800; text-transform: uppercase; font-size: clamp(2.6rem, 9.4vw, 9rem); line-height: .98; letter-spacing: -.012em; color: rgba(255, 255, 255, .95); overflow-wrap: anywhere; }
+.ht-b { font-weight: 800; text-transform: uppercase; font-size: clamp(2.6rem, 7.4vw, 7.4rem); line-height: .98; letter-spacing: -.012em; color: rgba(255, 255, 255, .95); overflow-wrap: anywhere; }
 .ht-c { font-weight: 300; font-size: clamp(1.7rem, 4.3vw, 4.1rem); line-height: 1.1; letter-spacing: .04em; }
 .ht-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 30px; margin-top: clamp(16px, 3vh, 30px); text-shadow: none; }
-.ht-price { font-weight: 800; font-size: clamp(1.3rem, 2.2vw, 1.9rem); color: #ffc14a; letter-spacing: .01em; font-variant-numeric: tabular-nums; }
-.hero-dots { position: absolute; left: 50%; transform: translateX(-50%); bottom: clamp(18px, 4vh, 34px); display: flex; gap: 14px; z-index: 3; }
-.hero-dot { width: 20px; height: 20px; display: grid; place-items: center; }
-.hero-dot::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; transition: background-color .3s, transform .3s var(--ease); }
-.hero-dot[aria-selected="true"]::before { background: #fff; transform: scale(1.08); }
-.hero-dot:hover::before { background: rgba(255, 255, 255, .5); }
+.hero-strip { position: absolute; left: clamp(16px, 5vw, 84px); right: clamp(16px, 5vw, 84px); bottom: 84px; z-index: 3; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
+.hero-strip::-webkit-scrollbar { display: none; }
+.hs-item { position: relative; flex: 0 0 auto; display: flex; align-items: center; gap: 12px; padding: 8px 18px 11px 8px; background: rgba(16, 17, 19, .55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #fff; text-align: left; transition: background-color .3s; }
+.hs-item:hover { background: rgba(16, 17, 19, .78); }
+.hs-img { width: 84px; aspect-ratio: 16 / 10; background: #2a2c30; overflow: hidden; flex: none; }
+.hs-img img { width: 100%; height: 100%; object-fit: cover; }
+.hs-txt { display: grid; line-height: 1.25; min-width: 0; }
+.hs-txt b { font-weight: 700; font-size: .98rem; white-space: nowrap; }
+.hs-txt small { font-size: .8rem; opacity: .8; white-space: nowrap; }
+.hs-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255, 255, 255, .22); }
+.hs-bar i { display: block; height: 100%; background: var(--accent); transform: scaleX(0); transform-origin: left; }
+.hs-item[aria-selected="true"] .hs-bar i { transform: scaleX(1); }
+.btn-ghost-light { color: #fff; }
+.btn-ghost-light::before { border-color: rgba(255, 255, 255, .5); }
+.btn-ghost-light:hover::before { border-color: #fff; background: rgba(255, 255, 255, .12); }
+@media (max-width: 759px) { .hs-txt { display: none; } .hs-item { padding: 6px 6px 9px; } .hs-img { width: 64px; } .hero-strip { bottom: 80px; } }
+
+/* Faixa fixa de diferenciais da loja (texto que nao muda com o estoque) */
+.benefits { border-bottom: 1px solid var(--line); background: var(--bg); }
+.benefits-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 24px; padding-block: 22px; }
+@media (min-width: 960px) { .benefits-row { grid-template-columns: repeat(4, 1fr); } }
+.benefits-row li { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: .95rem; line-height: 1.3; }
+.benefits-row .ic { width: 26px; height: 26px; color: var(--accent-deep); }
 @media (max-width: 759px) {
   .hero-text { top: calc(var(--nav-h) + 3vh); }
   .ht-b { font-size: clamp(2.4rem, 13vw, 4.4rem); }
