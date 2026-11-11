@@ -16,17 +16,18 @@ function commons(files) {
 }
 
 window.LOJA = {
-  nome: "Preguinho Veículos",
-  slogan: "Seminovos revisados",
-  cidade: "Porto Alegre, RS",
-  endereco: "Av. Ipiranga, 4120, Jardim Botânico",
-  cep: "90610-000",
-  telefone: "(51) 3028-4417",
+  nome: "Alfa Multimarcas RS",
+  slogan: "Novos e usados",
+  logo: "assets/logo-alfa.png",
+  cidade: "Rio Grande do Sul, RS",
+  endereco: "Endereço a confirmar",
+  cep: "",
+  telefone: "(51) 99999-0000",
   whatsapp: "5551999990000",
-  email: "contato@preguinhoveiculos.example",
-  instagram: "@preguinhoveiculos",
-  fundacao: 2009,
-  mapa: { lat: -30.0527, lon: -51.1969 },
+  email: "contato@alfamultimarcasrs.example",
+  instagram: "@alfa_multimarcasrs",
+  /* coordenadas do mapa; deixe null enquanto o endereco real nao estiver definido (o mapa some) */
+  mapa: null,
   horarios: [
     { dias: [1, 2, 3, 4, 5], abre: "08:30", fecha: "18:30", rotulo: "Segunda a sexta", texto: "08h30 às 18h30" },
     { dias: [6], abre: "09:00", fecha: "16:00", rotulo: "Sábado", texto: "09h às 16h" },

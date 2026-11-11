@@ -1,4 +1,4 @@
-/* Preguinho Veiculos - comportamento do site (paginas separadas por rota de hash) */
+/* Alfa Multimarcas RS - comportamento do site (paginas separadas por rota de hash) */
 (function () {
   'use strict';
 
@@ -14,7 +14,7 @@
 
   var nf = new Intl.NumberFormat('pt-BR');
   var nf2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  var DEFAULT_ACCENT = '#fba500';
+  var DEFAULT_ACCENT = '#ea202d';
   function brl(n) { return 'R$ ' + nf.format(Math.round(n)); }
   function km(n) { return nf.format(n) + ' km'; }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -79,16 +79,27 @@
     root.style.setProperty('--accent-ink', inkFor(accent));
     $$('[data-bind]').forEach(function (el) { var k = el.dataset.bind; el.textContent = loja[k] != null ? loja[k] : ''; });
     $$('[data-bind-href]').forEach(function (el) { el.href = 'tel:+55' + String(loja.telefone).replace(/\D/g, ''); });
+    var igUser = String(loja.instagram || '').replace(/^@/, '');
+    $$('[data-bind-ig]').forEach(function (el) { el.href = 'https://www.instagram.com/' + igUser + '/'; });
+    /* o logo so aparece quando o nome e o da loja original (se trocar o nome no Painel, some) */
+    var showLogo = !!loja.logo && loja.nome === window.LOJA.nome;
+    $$('[data-logo]').forEach(function (el) { el.hidden = !showLogo; if (loja.logo) el.src = loja.logo; });
+    $$('[data-nologo]').forEach(function (el) { el.hidden = showLogo; });
     $$('[data-bind-mail]').forEach(function (el) { el.href = 'mailto:' + loja.email; });
     $$('[data-juros]').forEach(function (el) { el.textContent = String(loja.jurosMensal).replace('.', ','); });
     $$('.wm').forEach(function (el) { el.textContent = loja.nome; });
     refreshTitle();
     $$('[data-wa]').forEach(function (el) { setWa(el); });
-    var m = loja.mapa, bb = [m.lon - .006, m.lat - .0034, m.lon + .006, m.lat + .0034].join(',');
-    var frame = $('#mapFrame');
-    var src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + bb + '&layer=mapnik&marker=' + m.lat + ',' + m.lon;
-    if (frame && frame.getAttribute('src') !== src) frame.setAttribute('src', src);
-    $('#mapLink').href = 'https://www.openstreetmap.org/?mlat=' + m.lat + '&mlon=' + m.lon + '#map=17/' + m.lat + '/' + m.lon;
+    var m = loja.mapa;
+    $('#map').hidden = !m;
+    $('.contact-grid').classList.toggle('no-map', !m);
+    if (m) {
+      var bb = [m.lon - .006, m.lat - .0034, m.lon + .006, m.lat + .0034].join(',');
+      var frame = $('#mapFrame');
+      var src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + bb + '&layer=mapnik&marker=' + m.lat + ',' + m.lon;
+      if (frame && frame.getAttribute('src') !== src) frame.setAttribute('src', src);
+      $('#mapLink').href = 'https://www.openstreetmap.org/?mlat=' + m.lat + '&mlon=' + m.lon + '#map=17/' + m.lat + '/' + m.lon;
+    }
     $('#horarios').innerHTML = loja.horarios.map(function (h) {
       return '<div class="hours-line"><span>' + h.rotulo + '</span><span>' + h.texto + '</span></div>';
     }).join('');
@@ -628,18 +639,6 @@
     $('#sellAgain').addEventListener('click', function () { sf.reset(); sf.hidden = false; $('#sellOk').hidden = true; sf.elements.nome.focus(); });
   }
 
-  /* ---------- depoimentos ---------- */
-  function bindCarousel() {
-    var tr = $('#depTrack');
-    function step(dir) { var q = $('.quote', tr); tr.scrollBy({ left: dir * (q.offsetWidth + 18), behavior: REDUCE ? 'auto' : 'smooth' }); }
-    $('#depPrev').addEventListener('click', function () { step(-1); });
-    $('#depNext').addEventListener('click', function () { step(1); });
-    var down = false, sx = 0, sl = 0;
-    tr.addEventListener('pointerdown', function (e) { if (e.pointerType !== 'mouse') return; down = true; sx = e.clientX; sl = tr.scrollLeft; });
-    window.addEventListener('pointermove', function (e) { if (!down) return; var dx = e.clientX - sx; if (Math.abs(dx) > 4) tr.classList.add('drag'); tr.scrollLeft = sl - dx; });
-    window.addEventListener('pointerup', function () { if (!down) return; down = false; tr.classList.remove('drag'); });
-  }
-
   /* ---------- menu mobile ---------- */
   function toggleMenu(force) {
     var nav = $('#nav'), m = $('#mnav'), open = typeof force === 'boolean' ? force : m.hidden;
@@ -651,7 +650,7 @@
   $$('#mnav a').forEach(function (a) { a.addEventListener('click', function () { toggleMenu(false); }); });
 
   /* ---------- painel do lojista ---------- */
-  var SWATCHES = [['#fba500', 'Âmbar'], ['#f2622d', 'Laranja'], ['#3b82f6', 'Azul'], ['#1fa971', 'Verde'], ['#e5484d', 'Vermelho'], ['#d9dce0', 'Prata']];
+  var SWATCHES = [['#ea202d', 'Vermelho'], ['#fba500', 'Âmbar'], ['#f2622d', 'Laranja'], ['#3b82f6', 'Azul'], ['#1fa971', 'Verde'], ['#d9dce0', 'Prata']];
   function openPanel() {
     var p = $('#panel');
     p.hidden = false;
@@ -728,13 +727,13 @@
 
   function bindBrandForm() {
     var form = $('#brandForm'), t;
-    function fillForm() { form.elements.nome.value = loja.nome; form.elements.cidade.value = loja.cidade; form.elements.whatsapp.value = loja.whatsapp; }
+    function fillForm() { ['nome', 'cidade', 'endereco', 'telefone', 'whatsapp'].forEach(function (k) { form.elements[k].value = loja[k] || ''; }); }
     fillForm();
     $('#swatches').innerHTML = SWATCHES.map(function (s) { return '<button class="swatch" type="button" role="radio" aria-checked="false" aria-label="' + s[1] + '" title="' + s[1] + '" data-c="' + s[0] + '" style="--c:' + s[0] + '"></button>'; }).join('');
     form.addEventListener('input', function () {
       clearTimeout(t);
       t = setTimeout(function () {
-        var p = {}; ['nome', 'cidade', 'whatsapp'].forEach(function (k) { var v = form.elements[k].value.trim(); if (v) p[k] = v; });
+        var p = {}; ['nome', 'cidade', 'endereco', 'telefone', 'whatsapp'].forEach(function (k) { var v = form.elements[k].value.trim(); if (v) p[k] = v; });
         API.salvarLoja(p); applyBrand();
       }, 250);
     });
@@ -801,7 +800,7 @@
   /* revelacao ao rolar e contadores, por IntersectionObserver (funciona em qualquer pagina) */
   function initReveal() {
     if (!MOTION || !('IntersectionObserver' in window)) return;
-    var targets = ['.sec-title', '.sec-sub', '.filters', '.fin-copy > *', '.sim', '.about-copy > *', '.about-img', '.stats > div', '.sell-form-wrap', '.dep-head', '.quote', '.contact-info > *', '.map', '.brands .wrap > *', '.promise-copy', '.promise-img', '.center-cta', '.banner-row', '.v-gallery', '.v-info', '.v-detail > div', '.footer-in > *'];
+    var targets = ['.sec-title', '.sec-sub', '.filters', '.fin-copy > *', '.sim', '.about-copy > *', '.about-img', '.stats > div', '.sell-form-wrap', '.ig-in', '.contact-info > *', '.map', '.brands .wrap > *', '.promise-copy', '.promise-img', '.center-cta', '.banner-row', '.v-gallery', '.v-info', '.v-detail > div', '.footer-in > *'];
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
     }, { rootMargin: '0px 0px -8% 0px' });
@@ -846,7 +845,7 @@
   function boot() {
     applyUrlParams();
     applyBrand();
-    bindFilters(); bindSim(); bindForms(); bindCarousel(); bindBrandForm(); bindHero(); bindVehicle();
+    bindFilters(); bindSim(); bindForms(); bindBrandForm(); bindHero(); bindVehicle();
     showSkeleton();
     initMotion();
     initReveal();

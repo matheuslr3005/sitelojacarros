@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Preguinho Veículos - Seminovos revisados</title>
-  <meta name="description" content="Seminovos com laudo cautelar, revisão completa e garantia. Veja o estoque, simule o financiamento e venha fazer seu test drive.">
-  <meta name="theme-color" content="#5f6062">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23fba500%27/%3E%3C/svg%3E">
+  <title>Alfa Multimarcas RS - Novos e usados</title>
+  <meta name="description" content="Novos e usados, variedade de estoque e financiamento em até 60x. Veja o estoque, simule a parcela e venha fazer seu test drive.">
+  <meta name="theme-color" content="#0d0d0f">
+  <link rel="icon" href="assets/logo-alfa.png">
   <link rel="stylesheet" href="css/styles.css">
   <script>
     /* aplica o tema antes da pintura para evitar flash */
@@ -24,7 +24,10 @@
         <a href="#/estoque" data-route="estoque">Estoque</a>
         <a href="#/financiamento" data-route="financiamento">Financiamento</a>
       </nav>
-      <a class="wordmark" href="#/" data-bind="nome" aria-label="Início">Preguinho Veículos</a>
+      <a class="wordmark" href="#/" aria-label="Início">
+        <img class="brand-logo" data-logo src="assets/logo-alfa.png" alt="" width="52" height="52">
+        <span data-bind="nome">Alfa Multimarcas RS</span>
+      </a>
       <div class="nav-right">
         <nav class="nav-side" aria-label="Secundário">
           <a href="#/venda" data-route="venda">Venda</a>
@@ -51,7 +54,7 @@
     <!-- ============ INICIO ============ -->
     <div class="page" data-page="inicio">
       <section class="hero" id="hero" aria-label="Carros em destaque">
-        <h1 class="sr"><span data-bind="nome">Preguinho Veículos</span>: seminovos revisados</h1>
+        <h1 class="sr"><span data-bind="nome">Alfa Multimarcas RS</span>: novos e usados</h1>
         <div class="hero-bg"></div>
         <div class="hero-stage" id="heroStage" aria-live="polite"></div>
         <div class="hero-shade"></div>
@@ -69,10 +72,10 @@
 
       <section class="benefits" aria-label="Diferenciais da loja">
         <ul class="wrap benefits-row">
-          <li><svg class="ic"><use href="#i-seal"/></svg><span>Laudo cautelar em todos os carros</span></li>
-          <li><svg class="ic"><use href="#i-shield"/></svg><span>90 dias de garantia</span></li>
-          <li><svg class="ic"><use href="#i-money"/></svg><span>Financiamento com os principais bancos</span></li>
-          <li><svg class="ic"><use href="#i-swap"/></svg><span>Aceitamos seu carro na troca</span></li>
+          <li><svg class="ic"><use href="#i-car"/></svg><span>Novos e usados</span></li>
+          <li><svg class="ic"><use href="#i-sliders"/></svg><span>Variedade de estoque</span></li>
+          <li><svg class="ic"><use href="#i-seal"/></svg><span>Mais de 10 anos no mercado</span></li>
+          <li><svg class="ic"><use href="#i-money"/></svg><span>Financiamento em até 60x</span></li>
         </ul>
       </section>
 
@@ -95,11 +98,12 @@
         <div class="wrap promise-grid">
           <div class="promise-img art" id="promiseImg" role="img" aria-label="Carro revisado do estoque"></div>
           <div class="promise-copy">
-            <h2 id="promTitle" class="sec-title sec-title-left"><span class="thin">O que vem com</span><span class="amb">todo carro da casa</span></h2>
+            <h2 id="promTitle" class="sec-title sec-title-left"><span class="thin">Seu carro novo</span><span class="amb">está aqui</span></h2>
             <ul class="promise-list">
-              <li><svg class="ic ic-lg"><use href="#i-seal"/></svg><div><h3>Laudo cautelar aprovado</h3><p>Estrutura, motor e histórico de sinistro conferidos antes de o carro entrar no estoque.</p></div></li>
-              <li><svg class="ic ic-lg"><use href="#i-wrench"/></svg><div><h3>Revisão e 90 dias de garantia</h3><p>Itens de desgaste trocados na nossa oficina e garantia de motor e câmbio por escrito.</p></div></li>
-              <li><svg class="ic ic-lg"><use href="#i-key"/></svg><div><h3>Documentação resolvida</h3><p>Transferência, vistoria e financiamento ficam com a nossa equipe. Você só retira a chave.</p></div></li>
+              <li><svg class="ic ic-lg"><use href="#i-car"/></svg><div><h3>Novos e usados</h3><p>Zero km e seminovos de várias marcas, para você escolher o que combina com o seu momento.</p></div></li>
+              <li><svg class="ic ic-lg"><use href="#i-sliders"/></svg><div><h3>Variedade de estoque</h3><p>Hatch, sedã, SUV e picape. Use os filtros e encontre o carro pelo que importa para você.</p></div></li>
+              <li><svg class="ic ic-lg"><use href="#i-seal"/></svg><div><h3>Mais de 10 anos no mercado</h3><p>Experiência em compra, venda e troca de veículos, com atendimento de quem conhece o mercado.</p></div></li>
+              <li><svg class="ic ic-lg"><use href="#i-money"/></svg><div><h3>Financiamento em até 60x</h3><p>Simule a parcela aqui no site e fale com a nossa equipe para ver as condições do seu carro.</p></div></li>
             </ul>
           </div>
         </div>
@@ -227,13 +231,13 @@
       <section class="section page-top" aria-labelledby="finTitle">
         <div class="wrap fin-grid">
           <div class="fin-copy">
-            <h1 id="finTitle" class="sec-title sec-title-left"><span class="thin">Financiamento</span><span class="amb">sem complicação</span></h1>
-            <p class="fin-lead">Trabalhamos com os principais bancos do país. Você faz a simulação aqui, nossa equipe leva a proposta para vários deles e você escolhe a melhor condição. Assim, você já sai da loja com o financiamento resolvido.</p>
+            <h1 id="finTitle" class="sec-title sec-title-left"><span class="thin">Financiamento</span><span class="amb">em até 60x</span></h1>
+            <p class="fin-lead">Faça a simulação aqui e fale com a nossa equipe. Trabalhamos com os principais bancos do país para você comparar as condições e sair da loja com o financiamento resolvido.</p>
             <div class="fin-info">
-              <div><h3 class="slashes">Taxas</h3><p><b>A partir de <span data-juros>1,89</span>% ao mês.</b> A taxa final depende da análise de crédito, do prazo e do perfil de cada cliente.</p></div>
-              <div><h3 class="slashes">Prazos</h3><p>De 12 a 60 meses, com parcelas que cabem no seu orçamento.</p></div>
-              <div><h3 class="slashes">Entrada</h3><p>A partir de 20% do valor do veículo. Também aceitamos o seu carro como parte do pagamento.</p></div>
-              <div><h3 class="slashes">Bancos</h3><p>Principais bancos do país, com análise de crédito rápida e acompanhamento da nossa equipe até a liberação.</p></div>
+              <div><h3 class="slashes">Taxas</h3><p>Conforme a análise de crédito, o prazo e o perfil de cada cliente. A simulação ao lado usa uma taxa ilustrativa de <span data-juros>1,89</span>% ao mês.</p></div>
+              <div><h3 class="slashes">Prazos</h3><p>Financiamento em até 60x, com parcelas que cabem no seu orçamento.</p></div>
+              <div><h3 class="slashes">Entrada</h3><p>Defina o valor da entrada na simulação. Também avaliamos o seu carro na troca.</p></div>
+              <div><h3 class="slashes">Bancos</h3><p>Principais bancos do país, com análise de crédito e acompanhamento da nossa equipe até a liberação.</p></div>
             </div>
           </div>
           <div class="sim" id="sim">
@@ -308,39 +312,29 @@
         <div class="wrap">
           <div class="about">
             <div class="about-copy">
-              <h1 id="lojaTitle" class="sec-title"><span class="thin">Mais do que vender carro,</span><span class="amb">uma conversa franca</span></h1>
-              <p>A <span data-bind="nome">Preguinho Veículos</span> começou em <span data-bind="fundacao">2009</span> com seis carros num terreno alugado e a regra de nunca vender o que não colocaríamos na garagem de casa.</p>
-              <p>Hoje são 1.800 m² de showroom, oficina própria e uma equipe que atende cada cliente pelo nome. Aqui você fala com quem escolheu, revisou e conhece cada carro do estoque.</p>
+              <h1 id="lojaTitle" class="sec-title"><span class="thin">Há mais de 10 anos</span><span class="amb">no mercado de veículos</span></h1>
+              <p>A <span data-bind="nome">Alfa Multimarcas RS</span> trabalha com novos e usados de várias marcas e uma variedade de estoque para você escolher.</p>
+              <p>Aqui você encontra atendimento direto, simulação de financiamento em até 60x e a possibilidade de avaliar o seu carro na troca.</p>
               <a class="btn btn-ghost" href="#/contato">Visite a loja</a>
             </div>
             <div class="about-img art" id="aboutImg" role="img" aria-label="Carro do estoque"></div>
           </div>
           <div class="stats">
-            <div><b class="count" data-to="4300" data-suffix="+">0</b><span>carros entregues</span></div>
-            <div><b class="count" data-to="97" data-suffix="%">0</b><span>de clientes que indicam a loja</span></div>
-            <div><b class="count" data-to="1800" data-suffix=" m²">0</b><span>de showroom e oficina própria</span></div>
+            <div><b class="count" data-to="10" data-suffix="+">0</b><span>anos no mercado</span></div>
+            <div><b class="count" data-to="60" data-suffix="x">0</b><span>financiamento em até</span></div>
+            <div><b class="txt">Multimarcas</b><span>variedade de estoque, novos e usados</span></div>
           </div>
         </div>
       </section>
 
-      <section class="section section-tight" aria-labelledby="depTitle" style="padding-top:0">
-        <div class="wrap">
-          <div class="dep-head">
-            <h2 id="depTitle" class="sec-title sec-title-left"><span class="thin">Quem já saiu</span><span class="amb">daqui dirigindo</span></h2>
-            <div class="dep-nav">
-              <button class="icon-btn" id="depPrev" type="button" aria-label="Depoimento anterior"><svg class="ic flip"><use href="#i-arrow"/></svg></button>
-              <button class="icon-btn" id="depNext" type="button" aria-label="Próximo depoimento"><svg class="ic"><use href="#i-arrow"/></svg></button>
-            </div>
-          </div>
-        </div>
-        <div class="dep-track" id="depTrack" tabindex="0" aria-label="Depoimentos de clientes">
-          <figure class="quote"><blockquote>“Levei a Compass para o meu mecânico antes de fechar e ele não achou nada. Tudo que prometeram estava no laudo.”</blockquote><figcaption><span class="avatar" style="--h:30">MT</span><span><b>Marcelo Tavares</b>comprou uma Jeep Compass</span></figcaption></figure>
-          <figure class="quote"><blockquote>“Vendi meu carro antigo e financiei o novo no mesmo dia. Não precisei ir a banco nenhum.”</blockquote><figcaption><span class="avatar" style="--h:200">PW</span><span><b>Patrícia Weber</b>trocou por um Corolla</span></figcaption></figure>
-          <figure class="quote"><blockquote>“Já é o terceiro carro que levo daqui. Quando tem problema, ligo e resolvem sem enrolar.”</blockquote><figcaption><span class="avatar" style="--h:140">JD</span><span><b>Jorge Dall'Agnol</b>cliente desde 2014</span></figcaption></figure>
-          <figure class="quote"><blockquote>“Escolhi pelo site, marquei o test drive pelo WhatsApp e saí com o carro na sexta.”</blockquote><figcaption><span class="avatar" style="--h:290">AB</span><span><b>Aline Bittencourt</b>comprou um T-Cross</span></figcaption></figure>
-          <figure class="quote"><blockquote>“Preço justo e atendimento sem pressão. Me deixaram dirigir o quanto eu quis antes de decidir.”</blockquote><figcaption><span class="avatar" style="--h:60">RS</span><span><b>Rafael Soares</b>comprou uma Hilux</span></figcaption></figure>
+      <section class="section section-tight ig" aria-labelledby="igTitle" style="padding-top:0">
+        <div class="wrap ig-in">
+          <h2 id="igTitle" class="sec-title"><span class="thin">Veja as novidades</span><span class="amb">no Instagram</span></h2>
+          <p class="sec-sub">Os carros que chegam ao estoque aparecem primeiro por lá.</p>
+          <a class="btn btn-primary btn-lg" data-bind-ig target="_blank" rel="noopener" href="#">Seguir <span data-bind="instagram"></span></a>
         </div>
       </section>
+
     </div>
 
     <!-- ============ CONTATO ============ -->
@@ -354,6 +348,7 @@
               <div><dt><svg class="ic"><use href="#i-pin"/></svg>Endereço</dt><dd><span data-bind="endereco"></span><br><span data-bind="cidade"></span></dd></div>
               <div><dt><svg class="ic"><use href="#i-phone"/></svg>Telefone</dt><dd><a data-bind-href="tel" data-bind="telefone" href="#"></a></dd></div>
               <div><dt><svg class="ic"><use href="#i-clock"/></svg>Horários</dt><dd id="horarios"></dd></div>
+              <div><dt><svg class="ic"><use href="#i-chat"/></svg>Instagram</dt><dd><a data-bind-ig target="_blank" rel="noopener" data-bind="instagram" href="#"></a></dd></div>
             </dl>
             <a class="btn btn-primary" data-wa data-msg="Olá! Quero fazer um test drive. Quais horários vocês têm disponíveis?" href="#" target="_blank" rel="noopener"><svg class="ic"><use href="#i-wa"/></svg>Falar no WhatsApp</a>
           </div>
@@ -370,20 +365,21 @@
   <footer class="footer">
     <div class="wrap footer-in">
       <div class="footer-brand">
-        <span class="mark2" aria-hidden="true"><i></i><i></i></span>
-        <span class="wordmark" data-bind="nome">Preguinho Veículos</span>
+        <img class="brand-logo brand-logo-lg" data-logo src="assets/logo-alfa.png" alt="">
+        <span class="mark2" data-nologo aria-hidden="true" hidden><i></i><i></i></span>
+        <span class="wordmark"><span data-bind="nome">Alfa Multimarcas RS</span></span>
       </div>
       <div class="footer-main">
-        <p>Estoque selecionado, revisão completa e atendimento de quem conhece cada carro. Estamos prontos para encontrar o veículo certo para você.</p>
+        <p>Novos e usados, variedade de estoque e financiamento em até 60x. Estamos prontos para encontrar o veículo certo para você.</p>
         <nav class="footer-links" aria-label="Rodapé">
           <a href="#/">Início</a><a href="#/sobre">Sobre nós</a><a href="#/estoque">Estoque</a><a href="#/financiamento">Financiamento</a><a href="#/venda">Venda</a><a href="#/contato">Contato</a>
         </nav>
         <div class="footer-cols">
           <div><h4 class="slashes">Visite nossa loja</h4><p data-bind="endereco"></p><p data-bind="cidade"></p></div>
-          <div><h4 class="slashes">Fale conosco</h4><a data-bind-href="tel" data-bind="telefone" href="#"></a><a data-bind-mail data-bind="email" href="#"></a></div>
+          <div><h4 class="slashes">Fale conosco</h4><a data-bind-href="tel" data-bind="telefone" href="#"></a><a data-bind-mail data-bind="email" href="#"></a><a data-bind-ig target="_blank" rel="noopener" data-bind="instagram" href="#"></a></div>
         </div>
       </div>
-      <p class="footer-fine">Imagens ilustrativas. Preços e condições sujeitos a alteração sem aviso. Financiamento sujeito à análise de crédito.</p>
+      <p class="footer-fine">Imagens ilustrativas. Preços e condições sujeitos a alteração sem aviso. Financiamento sujeito à análise de crédito. Site em fase de demonstração: veículos, preços e dados de contato são exemplos.</p>
     </div>
   </footer>
 
@@ -415,6 +411,8 @@
         <form class="adm-form" id="brandForm" novalidate>
           <label class="field"><span class="field-label">Nome da loja</span><input name="nome" autocomplete="off"></label>
           <label class="field"><span class="field-label">Cidade e estado</span><input name="cidade" autocomplete="off"></label>
+          <label class="field"><span class="field-label">Endereço</span><input name="endereco" autocomplete="off"></label>
+          <label class="field"><span class="field-label">Telefone</span><input name="telefone" inputmode="tel" autocomplete="off"></label>
           <label class="field"><span class="field-label">WhatsApp (com DDD)</span><input name="whatsapp" inputmode="tel" autocomplete="off" placeholder="51 99999 0000"></label>
           <div class="field"><span class="field-label">Cor da marca</span>
             <div class="swatches" id="swatches" role="radiogroup" aria-label="Cor da marca"></div>

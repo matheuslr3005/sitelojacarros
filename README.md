@@ -1,6 +1,6 @@
-# Preguinho Veículos (site de demonstração para lojas de carros)
+# Alfa Multimarcas RS (proposta de site)
 
-Site para apresentar a donos de lojas de carros que ainda não têm site, ou cujo site está desatualizado. A loja que aparece ("Preguinho Veículos") é fictícia e serve de vitrine do modelo. É HTML, CSS e JavaScript puros, sem instalar nada.
+Proposta de site para a Alfa Multimarcas RS (Instagram @alfa_multimarcasrs), feita a partir do logo, do nome e das informações do perfil. É HTML, CSS e JavaScript puros, sem instalar nada. O estoque, os preços e os dados de contato que aparecem são **exemplos** e precisam ser trocados pelos reais.
 
 ```bash
 python3 -m http.server 8000
@@ -20,8 +20,8 @@ Cada item do menu abre a sua própria página (não é uma rolagem contínua):
 | Veículo | Abre ao clicar num carro: galeria de fotos, preço, parcela, ficha técnica, opcionais, descrição, WhatsApp e outros carros |
 | Financiamento | Texto sobre taxas, prazos, entrada e bancos, mais o simulador de parcela |
 | Venda | Formulário completo (dados pessoais e do veículo) que monta a mensagem para o WhatsApp |
-| Sobre nós | História da loja, números e depoimentos |
-| Contato | Endereço, horários, "aberto agora", WhatsApp e mapa |
+| Sobre nós | Quem é a loja (novos e usados, mais de 10 anos, financiamento em até 60x) e link para o Instagram |
+| Contato | Endereço, telefone, horários, "aberto agora", Instagram e WhatsApp. O mapa só aparece quando `mapa` tiver as coordenadas reais |
 
 ## O hero se monta sozinho (sem manutenção)
 
@@ -53,15 +53,21 @@ Todo o site lê os dados por um único ponto, `js/api.js`. Hoje ele lê `js/data
 
 Formato de cada veículo: `id`, `marca`, `modelo`, `versao`, `ano`, `anoModelo`, `km`, `preco`, `combustivel`, `cambio`, `carroceria`, `motor`, `potencia`, `portas`, `opcionais[]`, `descricao`, `destaque`, `vendido`, `fotos[]` e, opcional, `selo` (texto no canto da foto, ex.: "Blindado").
 
+## Identidade da Alfa
+
+Logo em `assets/logo-alfa.png` (recortado do perfil do Instagram), vermelho `#EA202D` como cor de destaque, nav e rodapé pretos. Os textos usam só o que o perfil diz: novos e usados, variedade de estoque, mais de 10 anos no mercado e financiamento em até 60x. Números, depoimentos e promessas que não estão no perfil foram removidos.
+
+Dados que precisam ser confirmados com o cliente em `js/data/estoque.js` (bloco `LOJA`): endereço, telefone, WhatsApp, e-mail, horários e coordenadas do mapa. Dá para preencher ao vivo no Painel do lojista (aba Personalizar). Se o nome for trocado no Painel, o logo da Alfa some sozinho.
+
 ## Antes de mostrar para um cliente
 
-- Veículos, preços, quilometragens, depoimentos, endereço, telefone e números como "4.300 carros entregues" são fictícios. Troque pelos da loja ou use o Painel de personalização.
-- O mapa usa OpenStreetMap em volta de um ponto de Porto Alegre. Ajuste `mapa` em `js/data/estoque.js`.
+- Veículos, preços, quilometragens, endereço, telefone, WhatsApp e horários são exemplos. Troque pelos da loja ou use o Painel de personalização.
+- O mapa fica escondido até `mapa` receber as coordenadas reais da loja em `js/data/estoque.js`.
 - A simulação de financiamento usa taxa ilustrativa de 1,89% ao mês (`jurosMensal`) e o texto da página de Financiamento é genérico ("principais bancos"). Ajuste ao que a loja realmente trabalha.
 
 ## Estilo visual
 
-Página clara com navegação e rodapé cinza, acento âmbar (trocável), botões e filtros em paralelogramo inclinado, cards quadrados com fio de cor sob a foto. Fontes: Raleway e Michroma.
+Página clara com navegação e rodapé pretos, acento vermelho da marca (trocável), botões e filtros em paralelogramo inclinado, cards quadrados com fio de cor sob a foto. Fontes: Raleway e Michroma.
 
 ## Estrutura
 

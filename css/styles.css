@@ -1,6 +1,6 @@
 /* ==========================================================================
-   Garagem Verona - site de demonstracao para lojas de carros
-   Linguagem visual (referencia: lojas de carros premium com identidade amarelo-ambar)
+   Alfa Multimarcas RS - site de demonstracao
+   Linguagem visual: preto, branco e vermelho da marca; paralelogramos inclinados que lembram os chevrons do logo
    - Pagina clara, navegacao e rodape em cinza, hero em tela cheia com nome do carro gigante.
    - Um unico acento (--accent), trocavel pelo Painel do lojista.
    - Forma: botoes, campos de filtro e chips em paralelogramo inclinado (skewX);
@@ -14,7 +14,7 @@
 @font-face { font-family: "Geist Mono"; src: url("../assets/fonts/geist-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
 
 :root {
-  --accent: #fba500;
+  --accent: #ea202d;
   --accent-ink: #17120a;
   --skew: -16deg;
   --r-surf: 2px;
@@ -34,8 +34,8 @@
   --stage-a: #f7f7f7; --stage-b: #d3d5d8;
   --field: #efefef;
   --shadow: 0 18px 40px -22px rgba(0, 0, 0, .35);
-  --gray: #5f6062;
-  --nav-solid: rgba(88, 89, 91, .94);
+  --gray: #0d0d0f;
+  --nav-solid: rgba(13, 13, 15, .94);
 }
 html[data-theme="dark"] {
   color-scheme: dark;
@@ -47,8 +47,8 @@ html[data-theme="dark"] {
   --stage-a: #30343a; --stage-b: #141517;
   --field: #232528;
   --shadow: 0 22px 50px -24px rgba(0, 0, 0, .8);
-  --gray: #1c1d1f;
-  --nav-solid: rgba(24, 25, 27, .94);
+  --gray: #08080a;
+  --nav-solid: rgba(10, 10, 12, .94);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -73,7 +73,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .fine { font-size: .82rem; color: var(--muted); }
 
 /* Marca de dupla barra inclinada, usada antes de titulos pequenos */
-.slashes::before { content: ""; display: inline-block; width: 4px; height: 1.05em; background: var(--accent); transform: skewX(-26deg); box-shadow: 7px 0 0 var(--accent); margin: 0 18px 0 2px; vertical-align: -.14em; }
+.slashes::before { content: "\00BB"; display: inline-block; color: var(--accent); font-weight: 800; font-size: 1.25em; line-height: 1; margin: 0 10px 0 0; vertical-align: -.08em; }
 
 /* ---------- Titulos de secao: linha fina + linha pesada em ambar ---------- */
 .sec-title { display: grid; justify-items: center; text-align: center; gap: 2px; text-wrap: balance; }
@@ -117,7 +117,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .nav-side a { position: relative; font-size: 1.02rem; font-weight: 400; letter-spacing: .07em; padding: 8px 0; white-space: nowrap; transition: color .2s; }
 .nav-side a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 2px; height: 2px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .4s var(--ease); }
 .nav-side a:hover::after, .nav-side a.on::after { transform: scaleX(1); }
-.wordmark { font-family: var(--brand); text-transform: uppercase; letter-spacing: .14em; font-size: clamp(.95rem, 1.7vw, 1.35rem); line-height: 1; white-space: nowrap; }
+.wordmark { display: inline-flex; align-items: center; gap: 14px; font-family: var(--brand); text-transform: uppercase; letter-spacing: .14em; font-size: clamp(.95rem, 1.7vw, 1.35rem); line-height: 1; white-space: nowrap; }
 .nav-right { display: flex; align-items: center; gap: clamp(20px, 3.2vw, 56px); margin-left: auto; }
 .nav-tools { display: flex; align-items: center; gap: 4px; }
 .ic-sun { display: none; }
@@ -591,3 +591,16 @@ html.no-motion .rv, html.no-motion .ht-a, html.no-motion .ht-b, html.no-motion .
 .fin-info p { color: var(--muted); font-size: .96rem; }
 .fin-info p b { color: var(--text); font-weight: 600; }
 .sim { align-self: start; }
+
+/* ---------- Logo da loja ---------- */
+.brand-logo { width: 52px; height: 52px; border-radius: 50%; flex: none; display: block; object-fit: cover; background: #000; }
+.brand-logo-lg { width: 104px; height: 104px; }
+.brand-logo[hidden] { display: none; }
+@media (max-width: 1279px) and (min-width: 1040px) { .wordmark > span { display: none; } }
+@media (max-width: 479px) { .wordmark > span { display: none; } }
+.footer-brand .wordmark { align-items: center; }
+.stats b.txt { font-size: clamp(1.7rem, 3.4vw, 2.7rem); line-height: 1.2; padding-top: .35em; }
+.ig-in { display: grid; justify-items: center; gap: 12px; text-align: center; padding-top: clamp(32px, 5vw, 56px); border-top: 1px solid var(--line); }
+.ig-in .btn { margin-top: 10px; }
+.contact-grid.no-map { grid-template-columns: 1fr; max-width: 640px; }
+.contact-info > .btn { justify-self: start; }
