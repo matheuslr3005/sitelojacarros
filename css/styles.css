@@ -612,3 +612,12 @@ html[data-theme="dark"] .fine.err { color: #ff8a8e; }
 .adm-item.ro { grid-template-columns: 1fr auto; }
 .adm-st { font-weight: 700; font-size: .85rem; color: var(--muted); white-space: nowrap; }
 .sheet-actions .btn.loading { opacity: .7; }
+
+/* Login do lojista */
+.login-card { display: grid; gap: 16px; justify-items: stretch; max-width: 440px; margin: clamp(8px, 4vw, 40px) auto 0; padding: clamp(24px, 4vw, 40px); background: var(--surface); border-top: 4px solid var(--accent); box-shadow: var(--shadow); text-align: center; }
+.login-card .brand-logo { justify-self: center; }
+.login-title { font-size: 1.7rem; font-weight: 800; letter-spacing: -.01em; }
+.login-card .field { text-align: left; }
+.login-card .field-err { text-align: left; margin: 0; }
+.login-card .link-btn { justify-self: center; }
+.panel-head-actions { display: flex; align-items: center; gap: 12px; }

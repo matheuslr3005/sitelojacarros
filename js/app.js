@@ -112,7 +112,7 @@
     if (cars.length) { updateSim(true); if (current.name === 'veiculo') renderVehicleWa(); }
   }
 
-  var TITLES = { estoque: 'Estoque', financiamento: 'Financiamento', venda: 'Venda seu carro', sobre: 'Sobre nós', contato: 'Venha fazer seu test drive' };
+  var TITLES = { lojista: 'Área do lojista', estoque: 'Estoque', financiamento: 'Financiamento', venda: 'Venda seu carro', sobre: 'Sobre nós', contato: 'Venha fazer seu test drive' };
   function refreshTitle() {
     var t = current.name === 'veiculo' && byId(current.id) ? nome(byId(current.id)) : TITLES[current.name];
     document.title = t ? t + ' | ' + loja.nome : loja.nome + ' - ' + loja.slogan;
@@ -670,6 +670,7 @@
   /* ---------- painel do lojista ---------- */
   var SWATCHES = [['#ea202d', 'Vermelho'], ['#fba500', 'Âmbar'], ['#f2622d', 'Laranja'], ['#3b82f6', 'Azul'], ['#1fa971', 'Verde'], ['#d9dce0', 'Prata']];
   function openPanel() {
+    if (!Auth.logado()) { go('lojista'); return; }
     var p = $('#panel');
     p.hidden = false;
     $('#dockBtn').setAttribute('aria-expanded', 'true');
@@ -682,6 +683,42 @@
     if (MOTION) gsap.to($('.panel-card', p), { x: 30, opacity: 0, duration: .25, ease: 'power2.in', onComplete: done }); else done();
   }
   $('#dockBtn').addEventListener('click', function () { $('#panel').hidden ? openPanel() : closePanel(); });
+
+  /* ---------- acesso do lojista (login) ---------- */
+  function syncAdminAccess() {
+    var on = Auth.logado();
+    $('#dockBtn').hidden = !on;
+    if (!on && !$('#panel').hidden) closePanel();
+  }
+  function endSession(msg) {
+    Auth.sair(); syncAdminAccess();
+    if (msg) toast(msg);
+  }
+  $('#panelLogout').addEventListener('click', function () { endSession('Você saiu do painel'); });
+  setInterval(function () { if (!$('#dockBtn').hidden && !Auth.logado()) endSession('Sessão expirada. Entre de novo para continuar.'); }, 30000);
+
+  function bindLogin() {
+    var form = $('#loginForm'), err = $('#loginErr');
+    function show(msg) { err.textContent = msg; err.hidden = !msg; }
+    form.addEventListener('input', function () { show(''); });
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var btn = $('button[type=submit]', form), u = form.elements.usuario.value, pw = form.elements.senha.value;
+      if (!u.trim() || !pw) { show('Informe usuário e senha.'); return; }
+      var bl = Auth.bloqueadoMin();
+      if (bl) { show('Muitas tentativas. Tente de novo em ' + bl + ' min.'); return; }
+      btn.disabled = true; show('');
+      Auth.entrar(u, pw).then(function (r) {
+        btn.disabled = false;
+        form.elements.senha.value = '';
+        if (r.ok) { form.elements.usuario.value = ''; syncAdminAccess(); go(''); setTimeout(openPanel, 450); toast('Bem-vindo ao painel'); return; }
+        if (r.motivo === 'indisponivel') show('Este navegador não permite o login nesta página. Abra o site por https.');
+        else if (r.motivo === 'bloqueado') show('Muitas tentativas. Tente de novo em ' + r.minutos + ' min.');
+        else show('Usuário ou senha incorretos.' + (r.restantes <= 2 ? ' Restam ' + r.restantes + ' tentativas.' : ''));
+        form.elements.senha.focus();
+      });
+    });
+  }
   $('#panel').addEventListener('click', function (e) { if (e.target.closest('[data-pclose]')) closePanel(); });
   $$('.tabs button').forEach(function (b) {
     b.addEventListener('click', function () {
@@ -817,7 +854,7 @@
   }
 
   /* ---------- rotas (paginas) ---------- */
-  var PAGES = ['inicio', 'estoque', 'veiculo', 'financiamento', 'venda', 'sobre', 'contato'];
+  var PAGES = ['inicio', 'estoque', 'veiculo', 'financiamento', 'venda', 'sobre', 'contato', 'lojista'];
   function parseRoute() {
     var p = location.hash.replace(/^#\/?/, '').split('/');
     return { name: PAGES.indexOf(p[0]) > -1 ? p[0] : 'inicio', id: p[1] || '' };
@@ -826,6 +863,7 @@
     opts = opts || {};
     var r = parseRoute();
     if (r.name === 'veiculo' && cars.length && (!byId(r.id) || byId(r.id).vendido)) { location.replace('#/estoque'); return; }
+    if (r.name === 'lojista' && Auth.logado()) { location.replace('#/'); setTimeout(openPanel, 80); return; }
     var changed = r.name !== current.name || r.id !== current.id;
     current = r;
     $$('.page').forEach(function (pg) { pg.hidden = pg.dataset.page !== r.name; });
@@ -903,6 +941,7 @@
 
   /* ---------- inicializacao ---------- */
   function applyUrlParams() {
+    if (!Auth.logado()) return; /* personalizar por link e coisa do lojista */
     var p = new URLSearchParams(location.search), patch = {};
     if (p.get('loja')) patch.nome = p.get('loja');
     if (p.get('cidade')) patch.cidade = p.get('cidade');
@@ -913,8 +952,9 @@
 
   function boot() {
     applyUrlParams();
+    syncAdminAccess();
     applyBrand();
-    bindFilters(); bindSim(); bindForms(); bindBrandForm(); bindHero(); bindVehicle();
+    bindFilters(); bindSim(); bindForms(); bindBrandForm(); bindLogin(); bindHero(); bindVehicle();
     showSkeleton();
     initMotion();
     initReveal();

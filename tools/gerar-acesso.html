@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Gerar acesso do painel</title>
+<style>
+  body { font: 16px/1.55 system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 20px; color: #1b1b1b; }
+  h1 { font-size: 1.5rem; }
+  label { display: block; margin: 16px 0 6px; font-weight: 600; }
+  input { width: 100%; padding: 12px; font: inherit; border: 1px solid #aaa; border-radius: 4px; box-sizing: border-box; }
+  button { margin-top: 20px; padding: 12px 24px; font: inherit; font-weight: 700; background: #ea202d; color: #fff; border: 0; cursor: pointer; }
+  pre { background: #f1f1f1; padding: 14px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; user-select: all; }
+  .note { color: #555; font-size: .92rem; }
+  .bad { color: #b3261e; font-weight: 600; }
+</style>
+</head>
+<body>
+<h1>Gerar usuário e senha do painel</h1>
+<p class="note">Tudo é calculado aqui no seu navegador. Nada é enviado para a internet. Use uma senha <b>longa</b> (12 caracteres ou mais, de preferência uma frase): o código do site é público, e senha curta é fácil de descobrir.</p>
+<form id="f">
+  <label for="u">Usuário</label>
+  <input id="u" autocomplete="off" required>
+  <label for="s">Senha</label>
+  <input id="s" type="password" autocomplete="new-password" required>
+  <p id="aviso" class="bad" hidden></p>
+  <button type="submit">Gerar</button>
+</form>
+<div id="saida" hidden>
+  <p>Abra o arquivo <code>js/data/acesso.js</code> e troque a linha dentro de <code>usuarios</code> por esta:</p>
+  <pre id="linha"></pre>
+  <p class="note">Depois publique o site. Guarde a senha em um gerenciador de senhas: ela não pode ser recuperada a partir do código, só trocada.</p>
+</div>
+<script>
+const b64 = (a) => btoa(String.fromCharCode(...new Uint8Array(a)));
+document.getElementById('f').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const usuario = document.getElementById('u').value.trim(), senha = document.getElementById('s').value;
+  const aviso = document.getElementById('aviso');
+  aviso.hidden = true;
+  if (senha.length < 12) { aviso.textContent = 'Senha curta demais. Use pelo menos 12 caracteres.'; aviso.hidden = false; return; }
+  if (!crypto || !crypto.subtle) { aviso.textContent = 'Este navegador não permite o cálculo aqui. Abra a página por https ou localhost.'; aviso.hidden = false; return; }
+  const enc = new TextEncoder(), salt = crypto.getRandomValues(new Uint8Array(16)), it = 210000;
+  const full = new Uint8Array([...salt, ...enc.encode(usuario.toLowerCase())]);
+  const key = await crypto.subtle.importKey('raw', enc.encode(senha), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: full, iterations: it }, key, 256);
+  document.getElementById('linha').textContent = '{ usuario: "' + usuario.replace(/"/g, '') + '", salt: "' + b64(salt) + '", iteracoes: ' + it + ', hash: "' + b64(bits) + '" }';
+  document.getElementById('saida').hidden = false;
+  document.getElementById('s').value = '';
+});
+</script>
+</body>
+</html>

@@ -7,7 +7,7 @@
   <meta name="description" content="Novos e usados, variedade de estoque e financiamento em até 60x. Veja o estoque, simule a parcela e venha fazer seu test drive.">
   <meta name="theme-color" content="#0d0d0f">
   <link rel="icon" href="assets/logo-alfa.png">
-  <link rel="stylesheet" href="css/styles.css?v=alfa3">
+  <link rel="stylesheet" href="css/styles.css?v=alfa4">
   <script>
     /* aplica o tema antes da pintura para evitar flash */
     (function () { document.documentElement.classList.add('js'); try { var t = localStorage.getItem('gv-tema'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {} })();
@@ -337,6 +337,24 @@
 
     </div>
 
+    <!-- ============ AREA DO LOJISTA (login) ============ -->
+    <div class="page" data-page="lojista" hidden>
+      <section class="section page-top" aria-labelledby="loginTitle">
+        <div class="wrap">
+          <form class="login-card" id="loginForm" novalidate>
+            <img class="brand-logo brand-logo-lg" data-logo src="assets/logo-alfa.png" alt="">
+            <h1 id="loginTitle" class="login-title">Área do lojista</h1>
+            <p class="fine">Acesso restrito à equipe da loja.</p>
+            <label class="field"><span class="field-label">Usuário</span><input name="usuario" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+            <label class="field"><span class="field-label">Senha</span><input name="senha" type="password" autocomplete="current-password" required></label>
+            <p class="field-err" id="loginErr" role="alert" hidden></p>
+            <button class="btn btn-primary btn-block" type="submit">Entrar</button>
+            <a class="link-btn" href="#/">Voltar ao site</a>
+          </form>
+        </div>
+      </section>
+    </div>
+
     <!-- ============ CONTATO ============ -->
     <div class="page" data-page="contato" hidden>
       <section class="section page-top" aria-labelledby="contatoTitle">
@@ -386,13 +404,16 @@
   <a class="wa-float" data-wa data-msg="Olá! Vim pelo site e gostaria de falar com a loja." href="#" target="_blank" rel="noopener" aria-label="Falar no WhatsApp"><svg class="ic"><use href="#i-wa"/></svg></a>
 
   <!-- PAINEL DO LOJISTA (demo) -->
-  <button class="dock" id="dockBtn" type="button" aria-expanded="false" aria-controls="panel"><svg class="ic"><use href="#i-sliders"/></svg><span>Painel do lojista</span></button>
+  <button class="dock" id="dockBtn" type="button" aria-expanded="false" aria-controls="panel" hidden><svg class="ic"><use href="#i-sliders"/></svg><span>Painel do lojista</span></button>
   <aside class="panel" id="panel" hidden aria-label="Painel do lojista (demonstração)">
     <div class="panel-scrim" data-pclose></div>
     <div class="panel-card">
       <header class="panel-head">
         <div><h2>Painel do lojista</h2><p>Demonstração: mexa aqui e veja o site mudar ao lado.</p></div>
-        <button class="icon-btn" type="button" data-pclose aria-label="Fechar painel"><svg class="ic"><use href="#i-x"/></svg></button>
+        <div class="panel-head-actions">
+          <button class="link-btn" id="panelLogout" type="button">Sair</button>
+          <button class="icon-btn" type="button" data-pclose aria-label="Fechar painel"><svg class="ic"><use href="#i-x"/></svg></button>
+        </div>
       </header>
       <div class="tabs" role="tablist">
         <button role="tab" aria-selected="true" data-tab="estoque" type="button">Estoque</button>
@@ -453,15 +474,17 @@
 
   <div class="toasts" id="toasts" aria-live="polite"></div>
 
-  <script src="js/icons.js?v=alfa3"></script>
-  <script src="js/brands.js?v=alfa3"></script>
-  <script src="js/vendor/gsap.min.js?v=alfa3"></script>
-  <script src="js/vendor/ScrollTrigger.min.js?v=alfa3"></script>
-  <script src="js/vendor/Flip.min.js?v=alfa3"></script>
-  <script src="js/data/estoque.js?v=alfa3"></script>
-  <script src="js/sheet.js?v=alfa3"></script>
-  <script src="js/api.js?v=alfa3"></script>
-  <script src="js/photos.js?v=alfa3"></script>
-  <script src="js/app.js?v=alfa3"></script>
+  <script src="js/icons.js?v=alfa4"></script>
+  <script src="js/brands.js?v=alfa4"></script>
+  <script src="js/vendor/gsap.min.js?v=alfa4"></script>
+  <script src="js/vendor/ScrollTrigger.min.js?v=alfa4"></script>
+  <script src="js/vendor/Flip.min.js?v=alfa4"></script>
+  <script src="js/data/estoque.js?v=alfa4"></script>
+  <script src="js/sheet.js?v=alfa4"></script>
+  <script src="js/api.js?v=alfa4"></script>
+  <script src="js/photos.js?v=alfa4"></script>
+  <script src="js/data/acesso.js?v=alfa4"></script>
+  <script src="js/auth.js?v=alfa4"></script>
+  <script src="js/app.js?v=alfa4"></script>
 </body>
 </html>

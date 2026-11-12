@@ -37,21 +37,32 @@ Os carros usam fotos reais do Wikimedia Commons (licenças Creative Commons), ca
 
 Cada veículo tem uma lista `fotos` em `js/data/estoque.js`. O site usa a primeira que carregar, e as demais aparecem na galeria da página do veículo. Para usar fotos da loja, coloque os arquivos em `assets/carros/<id>/` e escreva `fotos: ["assets/carros/tcross-highline-22/1.jpg", "..."]`. Se nenhuma foto carregar, aparece um quadro neutro com "Foto em breve".
 
-## Painel do lojista (botão no canto inferior esquerdo)
+## Painel do lojista (com login)
 
-Ferramenta de venda da demonstração:
+O painel **não aparece para quem visita o site**: não há botão nem link. Quem tem acesso entra por `#/lojista` (ex.: `https://matheuslr3005.github.io/sitelojacarros/#/lojista`) com usuário e senha. Depois de entrar, aparece o botão "Painel do lojista" no canto inferior esquerdo, e o painel tem o botão "Sair".
 
-- **Estoque:** marque um carro como vendido (ele sai do site) ou mude o preço.
-- **Personalizar:** troque nome, cidade, WhatsApp e cor da marca e o site inteiro muda na hora.
-- **Integração:** mostra o fluxo sistema da loja, conector, site, com botão "Sincronizar agora".
+- **Estoque:** marcar vendido ou mudar preço (só no modo demonstração; com planilha conectada, o estoque é editado na planilha).
+- **Personalizar:** nome, cidade, endereço, telefone, WhatsApp e cor da marca.
+- **Integração:** colar o link da planilha do Google e conectar.
+- **Personalizar por link** (`?loja=...&cor=...&whats=...`) só funciona com o lojista logado.
 
-Também dá para abrir já personalizado por link: `index.html?loja=Auto%20Center%20Silveira&cor=3b82f6&cidade=Canoas%2C%20RS&whats=51988887777`. As alterações ficam salvas no navegador.
+### Como o acesso funciona (e o que ele não faz)
+
+O site é estático (GitHub Pages, sem servidor), então a senha é conferida no navegador, comparando um **hash** (PBKDF2-SHA256, 210 mil rodadas) guardado em `js/data/acesso.js`. A senha em si não está em lugar nenhum do código. Há bloqueio de 15 minutos após 5 erros e a sessão acaba ao fechar a aba ou depois de 8 horas.
+
+Isso esconde o painel de quem visita e barra tentativa fácil de adivinhar, mas **não é segurança de servidor**: alguém com conhecimento técnico pode ler o código do site e tentar descobrir a senha no próprio computador. Por isso:
+
+- Use uma senha **longa** (12 caracteres ou mais).
+- A proteção real do estoque é a **planilha do Google**: só quem tem permissão de edição nela (login Google, com verificação em duas etapas) consegue mudar preços e carros. Compartilhe a planilha como **"qualquer pessoa pode ver"**, nunca como editor.
+- O que o painel muda fica salvo só no navegador de quem usa. Nada que alguém faça nele altera o site para os outros visitantes.
+
+Para trocar usuário e senha: abra `tools/gerar-acesso.html` (no navegador, nada é enviado), digite os novos dados, cole a linha gerada em `js/data/acesso.js` e publique. Se um dia o painel precisar editar dados compartilhados direto no site, aí é preciso um servidor com login de verdade (por exemplo, Cloudflare Access, Firebase ou Supabase).
 
 ## Estoque por planilha (sem manutenção manual)
 
 A loja cadastra os carros numa **planilha do Google** e o site lê ela sozinho (a cada 5 minutos e ao voltar para a aba). Preço, carro vendido, fotos e carros novos se atualizam sem mexer no site. Guia para quem cuida da loja: [`docs/como-atualizar-o-estoque.md`](docs/como-atualizar-o-estoque.md). Planilha modelo para importar: `planilha-modelo/estoque-modelo.csv`.
 
-- **Testar na hora:** Painel do lojista, aba Integração, colar o link da planilha e "Conectar planilha" (fica só no navegador de quem testou).
+- **Testar na hora:** entrar no painel, aba Integração, colar o link da planilha e "Conectar planilha" (fica só no navegador de quem testou).
 - **Valer para todos:** preencher `planilha` em `js/data/estoque.js` (bloco `LOJA`). Com o campo vazio, o site usa os dados de demonstração.
 - **Proteções:** se a planilha cair ou o link estiver errado, o site mostra a última cópia boa e avisa no Painel. Carro sem preço mostra "Consulte". Fotos do Google Drive viram imagem direta.
 - **Código:** `js/sheet.js` lê e converte a planilha, `js/api.js` escolhe a fonte (planilha ou demonstração).
@@ -82,6 +93,9 @@ css/styles.css        tokens de tema, componentes e responsivo
 js/app.js             rotas, filtros, página do veículo, simulador, painel, animações
 js/api.js             camada de dados (planilha ou demonstração)
 js/sheet.js           leitor da planilha do Google (CSV)
+js/auth.js            login do painel (confere o hash da senha)
+js/data/acesso.js     usuário e hash da senha (nunca a senha)
+tools/gerar-acesso.html  gera o hash para trocar usuário e senha
 planilha-modelo/      planilha modelo para importar no Google Sheets
 docs/                 guia de uso para a loja
 js/data/estoque.js    loja e estoque de demonstração, com as fotos

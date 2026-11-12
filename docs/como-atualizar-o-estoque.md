@@ -40,7 +40,7 @@ Prefira fotos na horizontal, de pelo menos 1200 pixels de largura. Fotos muito p
 
 1. No Google Sheets: **Arquivo, Importar, Upload** e escolha `planilha-modelo/estoque-modelo.csv`. Apague as linhas de exemplo e cadastre os carros.
 2. Clique em **Compartilhar** e deixe como **"Qualquer pessoa com o link" pode ver**. Copie o link da planilha.
-3. Para testar na hora: abra o site, clique em **Painel do lojista**, aba **Integração**, cole o link e clique em **Conectar planilha**. Isso vale só para o seu navegador.
+3. Para testar na hora: entre no painel (endereço do site terminado em `#/lojista`, com usuário e senha), aba **Integração**, cole o link e clique em **Conectar planilha**. Isso vale só para o seu navegador.
 4. Para valer para todo mundo: coloque o link no campo `planilha` do arquivo `js/data/estoque.js` e publique.
 
 Dica: no Sheets, use **Dados, Validação de dados** nas colunas Status (lista: Disponível, Reservado, Vendido) e Destaque (Sim, Não) para evitar erro de digitação.
