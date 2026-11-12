@@ -47,11 +47,16 @@ Ferramenta de venda da demonstração:
 
 Também dá para abrir já personalizado por link: `index.html?loja=Auto%20Center%20Silveira&cor=3b82f6&cidade=Canoas%2C%20RS&whats=51988887777`. As alterações ficam salvas no navegador.
 
-## Como integrar com o sistema de estoque da loja
+## Estoque por planilha (sem manutenção manual)
 
-Todo o site lê os dados por um único ponto, `js/api.js`. Hoje ele lê `js/data/estoque.js` (dados de demonstração). Para a loja real, reescreva `API.listar()` para buscar do sistema dela (API, planilha, XML, JSON ou CSV) e devolver os veículos no mesmo formato. Nada no layout muda. Se a fonte exigir chave de acesso, o conector deve rodar num servidor pequeno e não no navegador.
+A loja cadastra os carros numa **planilha do Google** e o site lê ela sozinho (a cada 5 minutos e ao voltar para a aba). Preço, carro vendido, fotos e carros novos se atualizam sem mexer no site. Guia para quem cuida da loja: [`docs/como-atualizar-o-estoque.md`](docs/como-atualizar-o-estoque.md). Planilha modelo para importar: `planilha-modelo/estoque-modelo.csv`.
 
-Formato de cada veículo: `id`, `marca`, `modelo`, `versao`, `ano`, `anoModelo`, `km`, `preco`, `combustivel`, `cambio`, `carroceria`, `motor`, `potencia`, `portas`, `opcionais[]`, `descricao`, `destaque`, `vendido`, `fotos[]` e, opcional, `selo` (texto no canto da foto, ex.: "Blindado").
+- **Testar na hora:** Painel do lojista, aba Integração, colar o link da planilha e "Conectar planilha" (fica só no navegador de quem testou).
+- **Valer para todos:** preencher `planilha` em `js/data/estoque.js` (bloco `LOJA`). Com o campo vazio, o site usa os dados de demonstração.
+- **Proteções:** se a planilha cair ou o link estiver errado, o site mostra a última cópia boa e avisa no Painel. Carro sem preço mostra "Consulte". Fotos do Google Drive viram imagem direta.
+- **Código:** `js/sheet.js` lê e converte a planilha, `js/api.js` escolhe a fonte (planilha ou demonstração).
+
+Para ligar a um sistema de estoque ou CRM no futuro, basta reescrever `listar()` em `js/api.js` para devolver os veículos no mesmo formato (`id`, `marca`, `modelo`, `versao`, `ano`, `anoModelo`, `km`, `preco`, `combustivel`, `cambio`, `carroceria`, `motor`, `potencia`, `portas`, `opcionais[]`, `descricao`, `selo`, `destaque`, `vendido`, `fotos[]`). Se a fonte exigir chave de acesso, o conector deve rodar num servidor pequeno e não no navegador.
 
 ## Identidade da Alfa
 
@@ -75,7 +80,10 @@ Página clara com navegação e rodapé pretos, acento vermelho da marca (trocá
 index.html            todas as páginas (uma <div class="page"> por rota)
 css/styles.css        tokens de tema, componentes e responsivo
 js/app.js             rotas, filtros, página do veículo, simulador, painel, animações
-js/api.js             camada de dados (ponto de integração)
+js/api.js             camada de dados (planilha ou demonstração)
+js/sheet.js           leitor da planilha do Google (CSV)
+planilha-modelo/      planilha modelo para importar no Google Sheets
+docs/                 guia de uso para a loja
 js/data/estoque.js    loja e estoque de demonstração, com as fotos
 js/photos.js          carregamento das fotos, com troca automática para a próxima
 js/icons.js           ícones (Phosphor, MIT)

@@ -21,6 +21,7 @@
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function fmtH(h) { return h.replace(':', 'h'); }
   function nome(c) { return c.marca + ' ' + c.modelo; }
+  function anoTxt(c) { return c.ano ? (c.anoModelo && c.anoModelo !== c.ano ? c.ano + '/' + c.anoModelo : c.ano + '/' + c.ano) : ''; }
   function save(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* modo privado */ } }
   function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 
@@ -194,14 +195,16 @@
       '<button class="card-fav icon-btn" type="button" aria-label="Favoritar ' + esc(nome(c)) + '" aria-pressed="false"><svg class="ic"><use href="#i-heart"/></svg></button></div>' +
       '<div class="card-body">' +
         '<div class="c-brand">' + esc(c.marca) + '</div><div class="c-model">' + esc(c.modelo) + '</div><div class="c-ver">' + esc(c.versao) + '</div>' +
-        '<div class="c-meta"><span>' + km(c.km) + '</span><span>' + c.ano + '/' + c.anoModelo + '</span></div>' +
+        '<div class="c-meta">' + (c.km != null ? '<span>' + km(c.km) + '</span>' : '') + (c.ano ? '<span>' + anoTxt(c) + '</span>' : '') + '</div>' +
         '<div class="c-price"><small>R$</small><span class="p-val"></span></div><div class="c-sub p-sub"></div>' +
       '</div>' +
       '<button class="card-hit" type="button" aria-label="Ver detalhes do ' + esc(nome(c) + ' ' + c.versao) + '"></button>';
   }
   function updateCardEl(el, c) {
-    $('.p-val', el).textContent = nf2.format(c.preco);
-    $('.p-sub', el).textContent = 'ou ' + brl(pmt(c.preco, .3, 48)) + '/mês em 48x';
+    var has = c.preco > 0;
+    $('.p-val', el).textContent = has ? nf2.format(c.preco) : 'Consulte';
+    $('.c-price small', el).hidden = !has;
+    $('.p-sub', el).textContent = has ? 'ou ' + brl(pmt(c.preco, .3, 48)) + '/mês em 48x' : '';
   }
   function updateCardPrices(c) { $$('.card[data-id="' + c.id + '"]').forEach(function (el) { updateCardEl(el, c); }); }
   function makeCard(c) {
@@ -251,7 +254,7 @@
   }
 
   function populateFilters() {
-    function uniq(k) { var o = {}; cars.forEach(function (c) { o[c[k]] = 1; }); return Object.keys(o).sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); }); }
+    function uniq(k) { var o = {}; cars.forEach(function (c) { if (c[k]) o[c[k]] = 1; }); return Object.keys(o).sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); }); }
     var ph = { fMarca: 'Marca', fCarroceria: 'Carroceria' };
     function fill(sel, vals) {
       var cur = sel.value;
@@ -263,12 +266,15 @@
     fill($('#fComb'), uniq('combustivel'));
     fill($('#fCambio'), uniq('cambio'));
 
-    var prices = cars.map(function (c) { return c.preco; });
-    var max = Math.ceil(Math.max.apply(null, prices) / 5000) * 5000, min = Math.floor(Math.min.apply(null, prices) / 5000) * 5000;
-    var fp = $('#fPreco');
-    fp.min = min; fp.max = max;
-    if (!isFinite(F.preco) || F.preco > max) { fp.value = max; F.preco = Infinity; }
-    updatePrecoOut();
+    var prices = cars.map(function (c) { return c.preco; }).filter(function (v) { return v > 0; });
+    if (prices.length) {
+      var max = Math.ceil(Math.max.apply(null, prices) / 5000) * 5000, min = Math.floor(Math.min.apply(null, prices) / 5000) * 5000;
+      if (max <= min) max = min + 5000;
+      var fp = $('#fPreco');
+      fp.min = min; fp.max = max;
+      if (!isFinite(F.preco) || F.preco > max) { fp.value = max; F.preco = Infinity; }
+      updatePrecoOut();
+    }
 
     var bm = {};
     avail().forEach(function (c) { bm[c.marca] = (bm[c.marca] || 0) + 1; });
@@ -326,6 +332,8 @@
     $('#empty').hidden = list.length > 0;
     grid.hidden = list.length === 0;
     var total = avail().length;
+    $('#empty h3').textContent = total ? 'Nenhum carro com esses filtros' : 'Estoque em atualização';
+    $('#empty p').textContent = total ? 'Tente ampliar a faixa de preço ou remover algum filtro. Também podemos procurar o carro para você.' : 'Estamos atualizando os carros. Fale com a gente para saber o que temos disponível.';
     $('#resultCount').innerHTML = '<b>' + list.length + '</b> ' + (list.length === 1 ? 'carro encontrado' : 'carros encontrados') + (list.length !== total ? ' de ' + total : '');
     $$('.brand-btn').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.b === F.marca)); });
     $('#fMarca').value = F.marca;
@@ -411,16 +419,22 @@
   function setHeroText(c) {
     $('#htA').textContent = c.marca;
     $('#htB').textContent = c.modelo;
-    $('#htC').textContent = c.ano;
+    $('#htC').textContent = c.ano || '';
   }
   function buildHero() {
     hero.list = heroList();
+    if (!hero.list.length) {
+      $('#htA').textContent = loja.slogan || ''; $('#htB').textContent = loja.nome; $('#htC').textContent = '';
+      $('#heroTabs').innerHTML = '';
+      if (hero.layer) hero.layer.innerHTML = '';
+      return;
+    }
     var stage = $('#heroStage');
     if (!hero.layer || !stage.contains(hero.layer)) { stage.innerHTML = '<div class="stage-layer"></div>'; hero.layer = $('.stage-layer', stage); }
     var strip = $('#heroTabs');
     strip.innerHTML = hero.list.map(function (c, k) {
-      return '<button class="hs-item" role="tab" type="button" aria-selected="false" data-k="' + k + '" aria-label="' + esc(nome(c) + ' ' + c.ano) + '">' +
-        '<span class="hs-img"></span><span class="hs-txt"><b>' + esc(c.modelo) + '</b><small>' + esc(c.marca + ' ' + c.ano) + '</small></span><span class="hs-bar"><i></i></span></button>';
+      return '<button class="hs-item" role="tab" type="button" aria-selected="false" data-k="' + k + '" aria-label="' + esc(nome(c) + ' ' + (c.ano || '')) + '">' +
+        '<span class="hs-img"></span><span class="hs-txt"><b>' + esc(c.modelo) + '</b><small>' + esc(c.marca + (c.ano ? ' ' + c.ano : '')) + '</small></span><span class="hs-bar"><i></i></span></button>';
     }).join('');
     $$('.hs-img', strip).forEach(function (box, k) {
       Photos.loadFirst(hero.list[k].fotos, 300, '', true, function (img) { img.className = ''; box.appendChild(img); });
@@ -489,8 +503,9 @@
   }
   function renderVehicleWa() {
     var c = byId(current.id); if (!c) return;
-    setWa($('#vWa'), 'Olá! Tenho interesse no ' + nome(c) + ' ' + c.versao + ' ' + c.ano + ', anunciado por ' + brl(c.preco) + '. Ainda está disponível?');
-    setWa($('#vTest'), 'Olá! Quero fazer um test drive do ' + nome(c) + ' ' + c.versao + ' (' + c.ano + '). Quais horários vocês têm?');
+    var desc = (nome(c) + ' ' + (c.versao || '') + ' ' + (c.ano || '')).replace(/\s+/g, ' ').trim();
+    setWa($('#vWa'), 'Olá! Tenho interesse no ' + desc + (c.preco > 0 ? ', anunciado por ' + brl(c.preco) : '') + '. Ainda está disponível?');
+    setWa($('#vTest'), 'Olá! Quero fazer um test drive do ' + desc + '. Quais horários vocês têm?');
   }
   function renderGallery(c) {
     var main = $('#vgMain'), th = $('#vgThumbs'), token = ++galleryToken, selected = false, shown = 0;
@@ -533,18 +548,21 @@
     $('#vCrumb').textContent = nome(c);
     $('#vBrand').textContent = c.marca;
     $('#vTitle').textContent = c.modelo;
-    $('#vVersion').textContent = c.versao;
-    $('#vPrice').textContent = brl(c.preco);
-    $('#vParcela').innerHTML = 'ou <b>' + brl(pmt(c.preco, .3, 48)) + '</b>/mês em 48x com 30% de entrada';
-    $('#vDesc').textContent = c.descricao;
-    var specs = [['Ano', c.ano + '/' + c.anoModelo], ['Quilometragem', km(c.km)], ['Câmbio', c.cambio], ['Combustível', c.combustivel], ['Motor', c.motor], ['Potência', c.potencia], ['Carroceria', c.carroceria], ['Portas', c.portas]];
-    $('#vSpecs').innerHTML = specs.map(function (s) { return '<div><dt>' + s[0] + '</dt><dd>' + esc(s[1]) + '</dd></div>'; }).join('');
-    $('#vOpts').innerHTML = c.opcionais.map(function (o) { return '<li><svg class="ic"><use href="#i-check"/></svg>' + esc(o) + '</li>'; }).join('');
+    $('#vVersion').textContent = c.versao || '';
+    var has = c.preco > 0;
+    $('#vPrice').textContent = has ? brl(c.preco) : 'Consulte';
+    $('#vParcela').innerHTML = has ? 'ou <b>' + brl(pmt(c.preco, .3, 48)) + '</b>/mês em 48x com 30% de entrada' : 'Fale com a gente para saber o valor.';
+    $('#vDesc').textContent = c.descricao || 'Venha conhecer este carro de perto ou fale com a nossa equipe para mais detalhes.';
+    var specs = [['Ano', anoTxt(c)], ['Quilometragem', c.km != null ? km(c.km) : ''], ['Câmbio', c.cambio], ['Combustível', c.combustivel], ['Motor', c.motor], ['Potência', c.potencia], ['Carroceria', c.carroceria === 'Outros' ? '' : c.carroceria], ['Portas', c.portas], ['Cor', c.cor && c.cor.nome]].filter(function (x) { return x[1] !== '' && x[1] != null; });
+    $('#vSpecs').innerHTML = specs.map(function (x) { return '<div><dt>' + x[0] + '</dt><dd>' + esc(x[1]) + '</dd></div>'; }).join('');
+    var opts = c.opcionais || [];
+    $('#vOpts').innerHTML = opts.map(function (o) { return '<li><svg class="ic"><use href="#i-check"/></svg>' + esc(o) + '</li>'; }).join('');
+    $('#vOpts').closest('div').hidden = !opts.length;
     setHeart($('#vFav'), isFav(c.id));
     renderVehicleWa();
     renderGallery(c);
     var others = avail().filter(function (x) { return x.id !== c.id; });
-    others.sort(function (a, b) { return (b.carroceria === c.carroceria) - (a.carroceria === c.carroceria) || Math.abs(a.preco - c.preco) - Math.abs(b.preco - c.preco); });
+    others.sort(function (a, b) { return (b.carroceria === c.carroceria) - (a.carroceria === c.carroceria) || Math.abs((a.preco || 0) - (c.preco || 0)) - Math.abs((b.preco || 0) - (c.preco || 0)); });
     var rg = $('#relGrid');
     rg.innerHTML = '';
     others.slice(0, 4).forEach(function (x) { rg.appendChild(makeCard(x)); });
@@ -564,10 +582,10 @@
   /* ---------- simulador ---------- */
   var PRAZOS = [12, 24, 36, 48, 60];
   function buildSim() {
-    var sel = $('#sCar'), list = avail();
+    var sel = $('#sCar'), list = avail().filter(function (c) { return c.preco > 0; });
     if (!list.length) return;
     if (!sim.id || !list.some(function (c) { return c.id === sim.id; })) sim.id = list[Math.min(2, list.length - 1)].id;
-    sel.innerHTML = list.map(function (c) { return '<option value="' + c.id + '">' + esc(nome(c) + ' ' + c.ano + ' (' + brl(c.preco) + ')') + '</option>'; }).join('');
+    sel.innerHTML = list.map(function (c) { return '<option value="' + c.id + '">' + esc(nome(c) + (c.ano ? ' ' + c.ano : '') + ' (' + brl(c.preco) + ')') + '</option>'; }).join('');
     sel.value = sim.id;
     $('#sPrazo').innerHTML = PRAZOS.map(function (n) { return '<button class="chip" type="button" data-n="' + n + '" aria-pressed="' + (n === sim.prazo) + '">' + n + 'x</button>'; }).join('');
     updateSim(true);
@@ -655,7 +673,7 @@
     var p = $('#panel');
     p.hidden = false;
     $('#dockBtn').setAttribute('aria-expanded', 'true');
-    renderAdmin();
+    renderAdmin(); renderSheetInfo();
     if (MOTION) gsap.fromTo($('.panel-card', p), { x: 40, opacity: 0 }, { x: 0, opacity: 1, duration: .5, ease: 'power4.out' });
   }
   function closePanel() {
@@ -678,9 +696,15 @@
   });
 
   function renderAdmin() {
+    var ro = API.fonte() === 'planilha';
+    $('#admNote').textContent = ro
+      ? 'O estoque vem da planilha. Para marcar como vendido, mudar preço ou trocar fotos, edite a planilha: o site se atualiza sozinho em poucos minutos.'
+      : 'Marque um carro como vendido ou mude o preço. Na loja de verdade, isso vem da planilha ou do sistema de estoque, sem digitar nada duas vezes.';
+    $('#admReset').hidden = ro;
     $('#admList').innerHTML = cars.map(function (c) {
+      if (ro) return '<li class="adm-item ro' + (c.vendido ? ' sold' : '') + '" data-id="' + c.id + '"><div><b>' + esc(nome(c)) + '</b><small>' + esc((c.versao || '') + (c.ano ? ', ' + c.ano : '')) + '</small></div><span class="adm-st">' + (c.vendido ? 'Vendido' : (c.selo === 'Reservado' ? 'Reservado' : (c.preco > 0 ? brl(c.preco) : 'Consulte'))) + '</span></li>';
       return '<li class="adm-item' + (c.vendido ? ' sold' : '') + '" data-id="' + c.id + '">' +
-        '<div><b>' + esc(nome(c)) + '</b><small>' + esc(c.versao) + ', ' + c.ano + '</small></div>' +
+        '<div><b>' + esc(nome(c)) + '</b><small>' + esc((c.versao || '') + ', ' + c.ano) + '</small></div>' +
         '<button class="switch" type="button" aria-pressed="' + !!c.vendido + '"><i></i>Vendido</button>' +
         '<label class="adm-price">R$ <input type="number" min="0" step="500" value="' + c.preco + '" aria-label="Preço de ' + esc(nome(c)) + '"></label>' +
         '</li>';
@@ -742,12 +766,54 @@
     $('#syncBtn').addEventListener('click', function () {
       var b = this; if (b.classList.contains('loading')) return;
       b.classList.add('loading'); b.disabled = true;
-      API.sincronizar().then(function (d) {
+      API.listar().then(function (l) {
         b.classList.remove('loading'); b.disabled = false;
-        $('#syncInfo').textContent = 'Última sincronização: hoje às ' + pad(d.getHours()) + 'h' + pad(d.getMinutes()) + '.';
-        toast('Estoque sincronizado: ' + avail().length + ' veículos no ar');
+        applyStock(l); renderAdmin(); renderSheetInfo();
+        var st = API.status();
+        $('#syncInfo').textContent = 'Última sincronização: hoje às ' + pad(st.em.getHours()) + 'h' + pad(st.em.getMinutes()) + '.';
+        toast(st.ok ? 'Estoque sincronizado: ' + avail().length + ' veículos no ar' : 'Não consegui ler a planilha. Mostrando a última cópia.');
       });
     });
+    bindSheetForm();
+  }
+
+  /* ---------- planilha do estoque (Painel, aba Integracao) ---------- */
+  var sheetMsg = '';
+  function renderSheetInfo() {
+    var st = API.status(), el = $('#sheetInfo'), on = API.fonte() === 'planilha';
+    $('#sheetForm').elements.planilha.value = loja.planilha || '';
+    $('#sheetOff').hidden = !on;
+    if (sheetMsg) { el.textContent = sheetMsg; el.classList.add('err'); return; }
+    el.classList.toggle('err', on && !st.ok);
+    if (!on) { el.textContent = 'Usando o estoque de demonstração. Cole o link da planilha para conectar o estoque real.'; return; }
+    el.textContent = st.ok
+      ? 'Conectada: ' + st.total + ' veículos lidos às ' + pad(st.em.getHours()) + 'h' + pad(st.em.getMinutes()) + '.'
+      : st.erro + (st.usouCopia ? ' Mostrando a última cópia (' + st.total + ' veículos).' : '');
+  }
+  function bindSheetForm() {
+    var form = $('#sheetForm');
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var url = form.elements.planilha.value.trim(), btn = $('button[type=submit]', form);
+      if (!/^https?:\/\/docs\.google\.com\/|^https?:\/\/.+\.csv(\?.*)?$/i.test(url)) { sheetMsg = 'Cole o link da planilha do Google (começa com https://docs.google.com/spreadsheets/...).'; renderSheetInfo(); return; }
+      sheetMsg = ''; btn.disabled = true; btn.classList.add('loading');
+      API.salvarLoja({ planilha: url }); loja = API.loja();
+      API.listar().then(function (l) {
+        btn.disabled = false; btn.classList.remove('loading');
+        var st = API.status();
+        if (!st.ok && !st.usouCopia) {
+          sheetMsg = st.erro; API.removerCampoLoja('planilha'); loja = API.loja();
+          return API.listar().then(function (d) { applyStock(d); renderAdmin(); renderSheetInfo(); toast('Não consegui conectar a planilha'); });
+        }
+        applyStock(l); renderAdmin(); renderSheetInfo();
+        toast('Planilha conectada: ' + st.total + ' veículos');
+      });
+    });
+    $('#sheetOff').addEventListener('click', function () {
+      sheetMsg = ''; API.removerCampoLoja('planilha'); loja = API.loja();
+      API.listar().then(function (l) { applyStock(l); renderAdmin(); renderSheetInfo(); toast('Voltou ao estoque de demonstração'); });
+    });
+    form.addEventListener('input', function () { if (sheetMsg) { sheetMsg = ''; renderSheetInfo(); } });
   }
 
   /* ---------- rotas (paginas) ---------- */
@@ -819,7 +885,7 @@
 
   /* ---------- estoque vindo da fonte de dados ---------- */
   var stockSig = '';
-  function sigOf(list) { return JSON.stringify(list.map(function (c) { return [c.id, c.preco, c.vendido, c.km, c.destaque, (c.fotos || []).length]; })); }
+  function sigOf(list) { return JSON.stringify(list); }
   function applyStock(list) {
     cars = list; stockSig = sigOf(list);
     buildCards(); populateFilters(); applyFilters(false); buildSim(); syncFavs(); renderHome(); buildHero();
@@ -829,7 +895,10 @@
     }
   }
   function pollStock() {
-    API.listar().then(function (l) { if (sigOf(l) !== stockSig) applyStock(l); });
+    API.listar().then(function (l) {
+      if (sigOf(l) !== stockSig) { applyStock(l); if (!$('#panel').hidden) renderAdmin(); }
+      if (!$('#panel').hidden) renderSheetInfo();
+    });
   }
 
   /* ---------- inicializacao ---------- */
@@ -853,6 +922,7 @@
 
     API.listar().then(function (list) {
       applyStock(list);
+      if (API.fonte() === 'planilha' && !API.status().ok) toast('Não consegui atualizar o estoque pela planilha. Mostrando a última cópia.');
       Photos.mount($('#aboutImg'), { fotos: window.MIDIA.sobre, marca: 'Carro', modelo: 'do estoque' }, { w: 1200 });
       route({ silent: true });
       if (onPage('inicio') && !hero.intro) introHero();

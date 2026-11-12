@@ -7,7 +7,7 @@
   <meta name="description" content="Novos e usados, variedade de estoque e financiamento em até 60x. Veja o estoque, simule a parcela e venha fazer seu test drive.">
   <meta name="theme-color" content="#0d0d0f">
   <link rel="icon" href="assets/logo-alfa.png">
-  <link rel="stylesheet" href="css/styles.css?v=alfa1">
+  <link rel="stylesheet" href="css/styles.css?v=alfa3">
   <script>
     /* aplica o tema antes da pintura para evitar flash */
     (function () { document.documentElement.classList.add('js'); try { var t = localStorage.getItem('gv-tema'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {} })();
@@ -401,7 +401,7 @@
       </div>
 
       <div class="tab-pane" data-pane="estoque">
-        <p class="pane-note">Marque um carro como vendido ou mude o preço. Na loja de verdade, isso vem do seu sistema de estoque, sem digitar nada duas vezes.</p>
+        <p class="pane-note" id="admNote"></p>
         <ul class="adm-list" id="admList"></ul>
         <button class="link-btn" id="admReset" type="button">Restaurar estoque original</button>
       </div>
@@ -422,11 +422,19 @@
       </div>
 
       <div class="tab-pane" data-pane="integracao" hidden>
-        <p class="pane-note">O site lê o estoque de uma única fonte. Trocar o arquivo de demonstração pelo sistema da loja não muda nada no layout.</p>
+        <p class="pane-note">O site lê o estoque de uma planilha (Google Sheets). A loja só atualiza a planilha e o site muda sozinho: preço, carro vendido, fotos e carros novos.</p>
+        <form class="adm-form" id="sheetForm" novalidate>
+          <label class="field"><span class="field-label">Link da planilha do Google</span><input name="planilha" autocomplete="off" placeholder="https://docs.google.com/spreadsheets/d/..."></label>
+          <div class="sheet-actions">
+            <button class="btn btn-primary btn-sm" type="submit">Conectar planilha</button>
+            <button class="link-btn" id="sheetOff" type="button" hidden>Voltar ao estoque de demonstração</button>
+          </div>
+          <p class="fine" id="sheetInfo"></p>
+        </form>
         <div class="flow">
-          <div class="flow-node"><svg class="ic"><use href="#i-db"/></svg><b>Sistema da loja</b><span>onde o estoque já é controlado</span></div>
+          <div class="flow-node"><svg class="ic"><use href="#i-db"/></svg><b>Planilha da loja</b><span>onde o estoque é cadastrado</span></div>
           <div class="flow-link"></div>
-          <div class="flow-node"><svg class="ic"><use href="#i-plug"/></svg><b>Conector</b><span>API, planilha, XML, JSON ou CSV</span></div>
+          <div class="flow-node"><svg class="ic"><use href="#i-plug"/></svg><b>Leitura automática</b><span>a cada poucos minutos</span></div>
           <div class="flow-link"></div>
           <div class="flow-node flow-node-end"><svg class="ic"><use href="#i-car"/></svg><b>Este site</b><span>preço e status em tempo real</span></div>
         </div>
@@ -445,14 +453,15 @@
 
   <div class="toasts" id="toasts" aria-live="polite"></div>
 
-  <script src="js/icons.js?v=alfa1"></script>
-  <script src="js/brands.js?v=alfa1"></script>
-  <script src="js/vendor/gsap.min.js?v=alfa1"></script>
-  <script src="js/vendor/ScrollTrigger.min.js?v=alfa1"></script>
-  <script src="js/vendor/Flip.min.js?v=alfa1"></script>
-  <script src="js/data/estoque.js?v=alfa1"></script>
-  <script src="js/api.js?v=alfa1"></script>
-  <script src="js/photos.js?v=alfa1"></script>
-  <script src="js/app.js?v=alfa1"></script>
+  <script src="js/icons.js?v=alfa3"></script>
+  <script src="js/brands.js?v=alfa3"></script>
+  <script src="js/vendor/gsap.min.js?v=alfa3"></script>
+  <script src="js/vendor/ScrollTrigger.min.js?v=alfa3"></script>
+  <script src="js/vendor/Flip.min.js?v=alfa3"></script>
+  <script src="js/data/estoque.js?v=alfa3"></script>
+  <script src="js/sheet.js?v=alfa3"></script>
+  <script src="js/api.js?v=alfa3"></script>
+  <script src="js/photos.js?v=alfa3"></script>
+  <script src="js/app.js?v=alfa3"></script>
 </body>
 </html>

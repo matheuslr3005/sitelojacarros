@@ -33,6 +33,10 @@ window.LOJA = {
     { dias: [6], abre: "09:00", fecha: "16:00", rotulo: "Sábado", texto: "09h às 16h" },
     { dias: [0], abre: null, fecha: null, rotulo: "Domingo", texto: "Fechado" }
   ],
+  /* LINK DA PLANILHA DO ESTOQUE (Google Sheets). Cole aqui o link da planilha da loja: com ele preenchido,
+     o site passa a ler o estoque da planilha para todos os visitantes. Vazio = estoque de demonstracao.
+     (Colar o link so no Painel do lojista serve para testar: fica salvo apenas no seu navegador.) */
+  planilha: "",
   jurosMensal: 1.89 // usado apenas na simulacao ilustrativa de financiamento
 };
 

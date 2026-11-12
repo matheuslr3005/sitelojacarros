@@ -604,3 +604,11 @@ html.no-motion .rv, html.no-motion .ht-a, html.no-motion .ht-b, html.no-motion .
 .ig-in .btn { margin-top: 10px; }
 .contact-grid.no-map { grid-template-columns: 1fr; max-width: 640px; }
 .contact-info > .btn { justify-self: start; }
+
+/* Planilha do estoque (Painel) */
+.sheet-actions { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.fine.err { color: #c3262b; font-weight: 600; }
+html[data-theme="dark"] .fine.err { color: #ff8a8e; }
+.adm-item.ro { grid-template-columns: 1fr auto; }
+.adm-st { font-weight: 700; font-size: .85rem; color: var(--muted); white-space: nowrap; }
+.sheet-actions .btn.loading { opacity: .7; }

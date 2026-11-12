@@ -6,6 +6,9 @@
 (function () {
   /* Fotos do Wikimedia Commons aceitam ?width=N e devolvem uma miniatura do tamanho pedido. */
   function src(u, w) {
+    /* Links do Google Drive ("compartilhar", qualquer pessoa com o link) viram imagem direta */
+    var d = u.match(/drive\.google\.com\/file\/d\/([^\/?#]+)/) || u.match(/drive\.google\.com\/(?:open|uc)\?(?:[^#]*&)?id=([^&#]+)/);
+    if (d) return 'https://lh3.googleusercontent.com/d/' + d[1] + '=w' + (w || 800);
     if (/Special:FilePath/.test(u)) return u + (u.indexOf('?') > -1 ? '&' : '?') + 'width=' + (w || 800);
     return u;
   }
